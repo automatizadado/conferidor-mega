@@ -4,37 +4,115 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Conferidor Automático Mega</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #e8f5e9; padding: 15px; display: flex; justify-content: center; }
-        .card { background: white; padding: 20px; border-radius: 15px; max-width: 450px; width: 100%; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-top: 8px solid #204322; }
-        h2 { color: #204322; text-align: center; margin-bottom: 15px; margin-top: 5px; }
-        .input-group { margin-bottom: 10px; }
-        label { display: block; font-size: 0.85em; color: #666; font-weight: bold; margin-bottom: 3px; }
-        input { padding: 12px; border: 1px solid #ccc; border-radius: 8px; width: 100%; box-sizing: border-box; font-size: 16px; background: #f9f9f9; }
-        .sorteados-container { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; margin-top: 5px; }
-        .sorteados-container input { text-align: center; padding: 10px 2px; font-weight: bold; background: #fff; }
-        button { width: 100%; padding: 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1em; margin-top: 10px; transition: transform 0.1s; }
-        button:active { transform: scale(0.98); }
-        .btn-api { background: #007bff; color: white; margin-bottom: 10px; }
-        .btn-check { background: #204322; color: white; }
-        .btn-whatsapp { background: #25d366; color: white; display: none; margin-top: 15px; }
-        .resultado { margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 10px; display: none; border: 1px solid #eee; }
+        .card { background: white; padding: 25px; border-radius: 20px; max-width: 450px; width: 100%; box-shadow: 0 15px 35px rgba(0,0,0,0.08); border-top: 8px solid #1b5e20; }
+        h2 { color: #1b5e20; text-align: center; margin-bottom: 20px; margin-top: 5px; font-weight: 700; letter-spacing: -0.5px; }
+        .input-group { margin-bottom: 12px; }
+        label { display: block; font-size: 0.85em; color: #666; font-weight: bold; margin-bottom: 4px; }
+        input { padding: 12px; border: 1px solid #e0e0e0; border-radius: 10px; width: 100%; box-sizing: border-box; font-size: 16px; background: #f9f9f9; transition: all 0.2s; }
+        input:focus { border-color: #2e7d32; background: #fff; outline: none; box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1); }
+        .sorteados-container { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-top: 5px; }
+        .sorteados-container input { text-align: center; padding: 10px 2px; font-weight: bold; background: #fff; border-radius: 8px; }
+        
+        /* --- ESTILIZAÇÃO PREMIUM DOS BOTÕES --- */
+        button { 
+            width: 100%; 
+            padding: 15px 20px; 
+            border: none; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            font-size: 0.95em; 
+            margin-top: 12px; 
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px; /* Espaço perfeito entre o texto e o emoji */
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        button:hover { 
+            transform: translateY(-2px); /* Eleva de leve ao passar o mouse */
+        }
+        button:active { 
+            transform: translateY(1px); /* Desce de leve ao clicar */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        /* Botão Buscar (Azul Gradiente) */
+        .btn-api { 
+            background: linear-gradient(135deg, #0088ff, #0055ff); 
+            color: white; 
+            margin-bottom: 12px; 
+            box-shadow: 0 4px 14px rgba(0, 85, 255, 0.25);
+        }
+        .btn-api:hover {
+            box-shadow: 0 6px 20px rgba(0, 85, 255, 0.35);
+        }
+
+        /* Botão Conferir (Verde Floresta Gradiente) */
+        .btn-check { 
+            background: linear-gradient(135deg, #2e7d32, #1b5e20); 
+            color: white; 
+            box-shadow: 0 4px 14px rgba(27, 94, 32, 0.25);
+        }
+        .btn-check:hover {
+            box-shadow: 0 6px 20px rgba(27, 94, 32, 0.35);
+        }
+
+        /* Botão WhatsApp (Verde WhatsApp Gradiente Vibrante) */
+        .btn-whatsapp { 
+            background: linear-gradient(135deg, #25d366, #128c7e); 
+            color: white; 
+            display: none; 
+            margin-top: 15px; 
+            box-shadow: 0 4px 14px rgba(37, 211, 102, 0.25);
+        }
+        .btn-whatsapp:hover {
+            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.35);
+        }
+
+        /* Botão Salvar Imagem (Ciano/Teal Metálico Gradiente) */
+        .btn-foto { 
+            background: linear-gradient(135deg, #00b4db, #0083b0); 
+            color: white; 
+            display: none; 
+            margin-top: 10px; 
+            box-shadow: 0 4px 14px rgba(0, 180, 219, 0.25);
+        }
+        .btn-foto:hover {
+            box-shadow: 0 6px 20px rgba(0, 180, 219, 0.35);
+        }
+
+        /* --- FIM DOS BOTÕES --- */
+
+        .resultado { margin-top: 20px; padding: 18px; background: #fcfcfc; border-radius: 12px; display: none; border: 1px solid #eaeaea; }
         .alerta-vitoria { background: #d4edda; color: #155724; padding: 12px; border-radius: 8px; border: 1px solid #c3e6cb; margin-top: 15px; font-weight: bold; text-align: center; display: none; }
-        #status { font-size: 0.85em; text-align: center; color: #666; margin-bottom: 10px; font-weight: 500; }
+        #status { font-size: 0.85em; text-align: center; color: #666; margin-bottom: 12px; font-weight: 500; }
+
+        /* Estilos aplicados temporariamente para remover elementos do print automático */
+        .card.capturando .btn-api,
+        .card.capturando .btn-check,
+        .card.capturando .btn-whatsapp,
+        .card.capturando .btn-foto,
+        .card.capturando #status {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2>🍀 Mega-Sena Auto</h2>
+    <h2>🍀💰 Conferidor Mega-Sena 💰🍀</h2>
     
     <div id="status">Clique abaixo para buscar o último sorteio</div>
-    <button class="btn-api" onclick="buscarUltimoResultado()">🔄 BUSCAR RESULTADO OFICIAL</button>
+    <button class="btn-api" onclick="buscarUltimoResultado()">🔄 Buscar Resultado Oficial</button>
 
     <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-        <div style="flex: 1;"><label>Concurso</label><input type="number" id="concurso"></div>
-        <div style="flex: 1.3;"><label>Data Sorteio</label><input type="text" id="data-sorteio" placeholder="dd/mm/aaaa"></div>
-        <div style="flex: 0.9;"><label>Restantes</label><input type="number" id="restantes" value="12" oninput="salvarRestantes(this.value)"></div>
+        <div style="flex: 1.5;"><label>Concurso</label><input type="number" id="concurso"></div>
+        <div style="flex: 1;"><label>Restantes</label><input type="number" id="restantes" value="12" oninput="salvarRestantes(this.value)"></div>
     </div>
 
     <div class="input-group"><label>Prêmio do Concurso (R$)</label><input type="text" id="premio"></div>
@@ -45,13 +123,14 @@
         <input type="number" id="s4" min="1" max="60"><input type="number" id="s5" min="1" max="60"><input type="number" id="s6" min="1" max="60">
     </div>
 
-    <button class="btn-check" style="margin-top: 20px;" onclick="conferir()">CONFERIR MEUS JOGOS</button>
+    <button class="btn-check" style="margin-top: 20px;" onclick="conferir()">Conferir Meus Jogos 🎯</button>
     
     <div id="alerta" class="alerta-vitoria">🎊 TEVE JOGO PREMIADO! 🤑 🎊</div>
 
     <div id="resultado-box" class="resultado">
         <div id="lista-acertos"></div>
         <button class="btn-whatsapp" id="btn-wa" onclick="copiarWhatsApp()">Copiar para WhatsApp 📱</button>
+        <button class="btn-foto" id="btn-foto" onclick="gerarFotoResultado()">Salvar Imagem do Resultado 📸</button>
     </div>
 </div>
 
@@ -165,7 +244,7 @@ function conferir() {
             const dezenaFormatada = n.toString().padStart(2, '0');
             if (sorteados.includes(n)) {
                 acertos++;
-                return `<span style="background: #2ebd59; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin: 0 2px;">${dezenaFormatada}</span>`;
+                return `<span style="background: #2cbd59; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin: 0 2px;">${dezenaFormatada}</span>`;
             }
             return `<span style="margin: 0 2px; color: #444;">${dezenaFormatada}</span>`;
         }).join(' ');
@@ -191,10 +270,11 @@ function conferir() {
     document.getElementById('lista-acertos').innerHTML = html;
     document.getElementById('resultado-box').style.display = 'block';
     document.getElementById('btn-wa').style.display = 'block';
+    document.getElementById('btn-foto').style.display = 'block'; // Ativa o botão da foto
     document.getElementById('alerta').style.display = ganhou ? 'block' : 'none';
 }
 
-// Copia o resumo com formatação limpa e espaçamento perfeito de negritos para o WhatsApp
+// Copia o resumo com formatação limpa para a área de transferência
 function copiarWhatsApp() {
     const conc = document.getElementById('concurso').value || "---";
     const prem = document.getElementById('premio').value || "---";
@@ -216,21 +296,19 @@ function copiarWhatsApp() {
     meusJogos.forEach((jogo) => {
         const acertos = jogo.filter(n => sorteados.includes(n)).length;
         
-        // Mapeia os números, aplicando o negrito apenas aos acertos
         const jogoFormatadoWpp = jogo.map(n => {
             const dezenaFormatada = n.toString().padStart(2, '0');
             if (sorteados.includes(n)) {
-                return `*${dezenaFormatada}*`; // Envolve com asteriscos
+                return `*${dezenaFormatada}*`;
             }
             return dezenaFormatada;
-        }).join(' - '); // IMPORTANTE: O espaço entre os hífens " - " garante que o WhatsApp renderize o negrito perfeitamente!
+        }).join('  ');
 
         texto += jogoFormatadoWpp;
 
-        // Adiciona a contagem de acertos apenas se for maior que zero
         if (acertos > 0) {
             const labelAcerto = acertos === 1 ? 'acerto' : 'acertos';
-            texto += ` -> *${acertos} ${labelAcerto}*`;
+            texto += `  -> *${acertos} ${labelAcerto}*`;
         }
         texto += `\n`;
     });
@@ -242,6 +320,58 @@ function copiarWhatsApp() {
         alert("Resumo de conferência copiado para o WhatsApp!");
     }).catch(err => {
         alert("Erro ao copiar automaticamente. Tente selecionar o texto manual.");
+    });
+}
+
+// Tira o print automático recortado da área de resultado e copia/baixa
+async function gerarFotoResultado() {
+    const card = document.querySelector('.card');
+    const btnFoto = document.getElementById('btn-foto');
+    
+    btnFoto.innerText = "Gerando Imagem... ⌛";
+    
+    // Adiciona classe CSS para esconder os botões durante a captura
+    card.classList.add('capturando');
+    
+    // Pequeno delay (150ms) para que o navegador processe a alteração visual antes da captura
+    await new Promise(resolve => setTimeout(resolve, 150));
+    
+    html2canvas(card, {
+        scale: 2, // Garante que a imagem fique em HD/Retina
+        backgroundColor: '#ffffff',
+        useCORS: true
+    }).then(canvas => {
+        // Remove a classe para os botões voltarem a aparecer normalmente na sua tela
+        card.classList.remove('capturando');
+        btnFoto.innerText = "Salvar Imagem do Resultado 📸";
+        
+        const nConcurso = document.getElementById('concurso').value || "Mega";
+        const nomeArquivo = `Resultado_Mega_Concurso_${nConcurso}.png`;
+        
+        // 1. Trata o download automático da imagem
+        const link = document.createElement('a');
+        link.download = nomeArquivo;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        
+        // 2. Tenta copiar diretamente para a área de transferência do celular/PC
+        canvas.toBlob(blob => {
+            try {
+                const item = new ClipboardItem({ "image/png": blob });
+                navigator.clipboard.write([item]).then(() => {
+                    alert("Imagem gerada e salva com sucesso! Ela também foi COPIADA para a sua área de transferência. Basta ir no WhatsApp e dar 'Colar' (Ctrl+V). 😉");
+                });
+            } catch (e) {
+                // Caso o navegador local não permita a gravação direta de blobs na clipboard (segurança de alguns navegadores mobile)
+                alert("Imagem gerada e baixada com sucesso! Você já pode enviá-la pelo WhatsApp.");
+            }
+        }, 'image/png');
+        
+    }).catch(err => {
+        card.classList.remove('capturando');
+        btnFoto.innerText = "Salvar Imagem do Resultado 📸";
+        alert("Não foi possível gerar a imagem automaticamente no seu navegador. Use o print clássico do celular.");
+        console.error(err);
     });
 }
 </script>
