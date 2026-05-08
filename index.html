@@ -101,7 +101,6 @@ async function buscarUltimoResultado() {
         const currentConcurso = data.concurso;
         document.getElementById('concurso').value = currentConcurso;
         
-        // CORREÇÃO SEGURA: Só preenche se o elemento existir na tela
         const inputDataSorteio = document.getElementById('data-sorteio');
         if (inputDataSorteio) {
             inputDataSorteio.value = data.data || "";
@@ -133,7 +132,7 @@ async function buscarUltimoResultado() {
             status.innerText = `Resultado e prêmio real do concurso ${currentConcurso} carregados com sucesso!`;
             status.style.color = "green";
         } else {
-            // Fallback: Se falhar a busca do N-1, exibe o estimado cadastrado no próprio JSON do concurso atual
+            // Fallback
             const fallbackPremio = data.valorEstimadoProximoConcurso || data.valorAcumuladoProximoConcurso || 0;
             document.getElementById('premio').value = fallbackPremio.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
             status.innerText = `Resultado carregado (Prêmio obtido via estimativa de contingência).`;
@@ -195,7 +194,7 @@ function conferir() {
     document.getElementById('alerta').style.display = ganhou ? 'block' : 'none';
 }
 
-// Copia o resumo com formatação limpa para a área de transferência
+// Copia o resumo com formatação limpa e espaçamento perfeito de negritos para o WhatsApp
 function copiarWhatsApp() {
     const conc = document.getElementById('concurso').value || "---";
     const prem = document.getElementById('premio').value || "---";
@@ -209,38 +208,34 @@ function copiarWhatsApp() {
 
     const sorteadosStr = sorteados.map(n => n.toString().padStart(2, '0')).join(' ');
 
-    // CORREÇÃO SEGURA: Captura a data da tela apenas se o campo existir e estiver preenchido
     const inputDataSorteio = document.getElementById('data-sorteio');
     const dataTexto = inputDataSorteio && inputDataSorteio.value ? ` (${inputDataSorteio.value})` : "";
 
     let texto = `🍀 *RESUMO MEGA-SENA*\n🔢 *Concurso:* ${conc}${dataTexto}\n💰 *Prêmio:* R$ ${prem}\n✨ *Resultado:* ${sorteadosStr}\n--------------------------\n`;
     
-    let ganhou = false;
-    meusJogos.forEach((jogo, i) => {
+    meusJogos.forEach((jogo) => {
         const acertos = jogo.filter(n => sorteados.includes(n)).length;
-        if (acertos >= 4) ganhou = true;
         
-        let faixa = "";
-        if (acertos === 4) faixa = " (🏅 QUADRA!)";
-        else if (acertos === 5) faixa = " (🔥 QUINA!!)";
-        else if (acertos === 6) faixa = " (👑 SENA!!!)";
-
-        // Destaca no WhatsApp apenas as dezenas que foram acertadas
+        // Mapeia os números, aplicando o negrito apenas aos acertos
         const jogoFormatadoWpp = jogo.map(n => {
             const dezenaFormatada = n.toString().padStart(2, '0');
             if (sorteados.includes(n)) {
-                return `*${dezenaFormatada}*`; // Envolve em asteriscos para virar negrito no WhatsApp
+                return `*${dezenaFormatada}*`; // Envolve com asteriscos
             }
             return dezenaFormatada;
-        }).join('-');
+        }).join(' - '); // IMPORTANTE: O espaço entre os hífens " - " garante que o WhatsApp renderize o negrito perfeitamente!
 
-        texto += `✅ Jogo ${i + 1}: ${jogoFormatadoWpp} -> *${acertos} acertos*${faixa}\n`;
+        texto += jogoFormatadoWpp;
+
+        // Adiciona a contagem de acertos apenas se for maior que zero
+        if (acertos > 0) {
+            const labelAcerto = acertos === 1 ? 'acerto' : 'acertos';
+            texto += ` -> *${acertos} ${labelAcerto}*`;
+        }
+        texto += `\n`;
     });
 
     texto += `--------------------------\n`;
-    if (ganhou) {
-        texto += `🎊 *TEVE JOGO PREMIADO!* 🤑\n--------------------------\n`;
-    }
     texto += `⏳ *Sorteios restantes:* ${rest}`;
 
     navigator.clipboard.writeText(texto).then(() => {
