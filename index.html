@@ -3,18 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conferidor Automático Mega</title>
+    <title>Conferidor Premium Mega-Sena</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #e8f5e9; padding: 15px; display: flex; justify-content: center; }
-        .card { background: white; padding: 25px; border-radius: 20px; max-width: 450px; width: 100%; box-shadow: 0 15px 35px rgba(0,0,0,0.08); border-top: 8px solid #1b5e20; }
-        h2 { color: #1b5e20; text-align: center; margin-bottom: 20px; margin-top: 5px; font-weight: 700; letter-spacing: -0.5px; }
+        /* --- ESTILO GLOBAL DARK MODE --- */
+        body { 
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+            background: #000000; /* Fundo preto total */
+            color: #E5E7EB; 
+            padding: 15px; 
+            display: flex; 
+            justify-content: center; 
+            margin: 0;
+            min-height: 100vh;
+            align-items: center;
+        }
+
+        /* --- CARTÃO DE CONFERÊNCIA ESCURO --- */
+        .card { 
+            background: #121214; 
+            padding: 25px; 
+            border-radius: 20px; 
+            max-width: 450px; 
+            width: 100%; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6); 
+            border: 1px solid #2ebd59; 
+            border-top: 8px solid #2ebd59; 
+        }
+
+        /* --- TÍTULO CONFORME SOLICITADO --- */
+        h2 { 
+            color: #2ebd59; 
+            text-align: center; 
+            margin-bottom: 20px; 
+            margin-top: 5px; 
+            font-weight: 700; 
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
         .input-group { margin-bottom: 12px; }
-        label { display: block; font-size: 0.85em; color: #666; font-weight: bold; margin-bottom: 4px; }
-        input { padding: 12px; border: 1px solid #e0e0e0; border-radius: 10px; width: 100%; box-sizing: border-box; font-size: 16px; background: #f9f9f9; transition: all 0.2s; }
-        input:focus { border-color: #2e7d32; background: #fff; outline: none; box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1); }
+        label { display: block; font-size: 0.85em; color: #9CA3AF; font-weight: bold; margin-bottom: 4px; }
+
+        /* --- INPUTS NO ESTILO DARK --- */
+        input { 
+            padding: 12px; 
+            border: 1px solid #374151; 
+            border-radius: 10px; 
+            width: 100%; 
+            box-sizing: border-box; 
+            font-size: 16px; 
+            background: #1F2937; 
+            color: #FFFFFF; 
+            transition: all 0.2s; 
+        }
+        input:focus { 
+            border-color: #2ebd59; 
+            background: #1F2937; 
+            outline: none; 
+            box-shadow: 0 0 0 3px rgba(46, 189, 89, 0.2); 
+        }
+
+        /* --- CONTEINER DE SORTEADOS COM CONTORNO NEON --- */
         .sorteados-container { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-top: 5px; }
-        .sorteados-container input { text-align: center; padding: 10px 2px; font-weight: bold; background: #fff; border-radius: 8px; }
+        .sorteados-container input { 
+            text-align: center; 
+            padding: 10px 2px; 
+            font-weight: bold; 
+            background: #111827; 
+            border: 1px solid #2ebd59; /* Borda verde neon nativa */
+            border-radius: 8px; 
+            color: #FFFFFF;
+        }
         
         /* --- ESTILIZAÇÃO PREMIUM DOS BOTÕES --- */
         button { 
@@ -29,16 +92,16 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 8px; /* Espaço perfeito entre o texto e o emoji */
+            gap: 8px; 
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         button:hover { 
-            transform: translateY(-2px); /* Eleva de leve ao passar o mouse */
+            transform: translateY(-2px); 
         }
         button:active { 
-            transform: translateY(1px); /* Desce de leve ao clicar */
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+            transform: translateY(1px); 
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
         }
 
         /* Botão Buscar (Azul Gradiente) */
@@ -54,15 +117,15 @@
 
         /* Botão Conferir (Verde Floresta Gradiente) */
         .btn-check { 
-            background: linear-gradient(135deg, #2e7d32, #1b5e20); 
+            background: linear-gradient(135deg, #2ebd59, #1b5e20); 
             color: white; 
-            box-shadow: 0 4px 14px rgba(27, 94, 32, 0.25);
+            box-shadow: 0 4px 14px rgba(46, 189, 89, 0.25);
         }
         .btn-check:hover {
-            box-shadow: 0 6px 20px rgba(27, 94, 32, 0.35);
+            box-shadow: 0 6px 20px rgba(46, 189, 89, 0.35);
         }
 
-        /* Botão WhatsApp (Verde WhatsApp Gradiente Vibrante) */
+        /* Botão WhatsApp (Verde WhatsApp) */
         .btn-whatsapp { 
             background: linear-gradient(135deg, #25d366, #128c7e); 
             color: white; 
@@ -74,7 +137,7 @@
             box-shadow: 0 6px 20px rgba(37, 211, 102, 0.35);
         }
 
-        /* Botão Salvar Imagem (Ciano/Teal Metálico Gradiente) */
+        /* Botão Salvar Imagem (Ciano) */
         .btn-foto { 
             background: linear-gradient(135deg, #00b4db, #0083b0); 
             color: white; 
@@ -86,13 +149,29 @@
             box-shadow: 0 6px 20px rgba(0, 180, 219, 0.35);
         }
 
-        /* --- FIM DOS BOTÕES --- */
+        /* --- RESULTADOS --- */
+        .resultado { 
+            margin-top: 20px; 
+            padding: 18px; 
+            background: #111827; 
+            border-radius: 12px; 
+            display: none; 
+            border: 1px solid #374151; 
+        }
+        .alerta-vitoria { 
+            background: #064E3B; 
+            color: #A7F3D0; 
+            padding: 12px; 
+            border-radius: 8px; 
+            border: 1px solid #047857; 
+            margin-top: 15px; 
+            font-weight: bold; 
+            text-align: center; 
+            display: none; 
+        }
+        #status { font-size: 0.85em; text-align: center; color: #9CA3AF; margin-bottom: 12px; font-weight: 500; }
 
-        .resultado { margin-top: 20px; padding: 18px; background: #fcfcfc; border-radius: 12px; display: none; border: 1px solid #eaeaea; }
-        .alerta-vitoria { background: #d4edda; color: #155724; padding: 12px; border-radius: 8px; border: 1px solid #c3e6cb; margin-top: 15px; font-weight: bold; text-align: center; display: none; }
-        #status { font-size: 0.85em; text-align: center; color: #666; margin-bottom: 12px; font-weight: 500; }
-
-        /* Estilos aplicados temporariamente para remover elementos do print automático */
+        /* Estilos temporários para a captura */
         .card.capturando .btn-api,
         .card.capturando .btn-check,
         .card.capturando .btn-whatsapp,
@@ -105,7 +184,7 @@
 <body>
 
 <div class="card">
-    <h2>🍀💰 Conferidor Mega-Sena 💰🍀</h2>
+    <h2>🍀 💰 Conferidor Mega-Sena 💰 🍀</h2>
     
     <div id="status">Clique abaixo para buscar o último sorteio</div>
     <button class="btn-api" onclick="buscarUltimoResultado()">🔄 Buscar Resultado Oficial</button>
@@ -170,7 +249,7 @@ function getSorteados() {
 async function buscarUltimoResultado() {
     const status = document.getElementById('status');
     status.innerText = "Buscando concurso mais recente...";
-    status.style.color = "#666";
+    status.style.color = "#9CA3AF";
     
     try {
         // 1. Busca o concurso mais recente (N)
@@ -209,7 +288,7 @@ async function buscarUltimoResultado() {
         if (valorPremioReal) {
             document.getElementById('premio').value = valorPremioReal.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
             status.innerText = `Resultado e prêmio real do concurso ${currentConcurso} carregados com sucesso!`;
-            status.style.color = "green";
+            status.style.color = "#2ebd59";
         } else {
             // Fallback
             const fallbackPremio = data.valorEstimadoProximoConcurso || data.valorAcumuladoProximoConcurso || 0;
@@ -220,7 +299,7 @@ async function buscarUltimoResultado() {
         
     } catch (error) {
         status.innerText = "Erro ao buscar dados. Digite os números manualmente.";
-        status.style.color = "red";
+        status.style.color = "#EF4444";
     }
 }
 
@@ -239,14 +318,14 @@ function conferir() {
     meusJogos.forEach((jogo, i) => {
         let acertos = 0;
         
-        // Renderiza as dezenas destacando em verde as acertadas
+        // Renderiza as dezenas destacando em verde com texto preto as dezenas acertadas
         const jogoHtml = jogo.map(n => {
             const dezenaFormatada = n.toString().padStart(2, '0');
             if (sorteados.includes(n)) {
                 acertos++;
-                return `<span style="background: #2cbd59; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin: 0 2px;">${dezenaFormatada}</span>`;
+                return `<span style="background: #2ebd59; color: #000000; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin: 0 2px; box-shadow: 0 0 5px rgba(46,189,89,0.5);">${dezenaFormatada}</span>`;
             }
-            return `<span style="margin: 0 2px; color: #444;">${dezenaFormatada}</span>`;
+            return `<span style="margin: 0 2px; color: #9CA3AF;">${dezenaFormatada}</span>`;
         }).join(' ');
 
         if (acertos >= 4) ganhou = true;
@@ -258,9 +337,9 @@ function conferir() {
         else if (acertos === 6) faixa = " (👑 SENA!!!)";
 
         html += `
-            <div style="margin-bottom: 12px; font-size: 0.95em; border-bottom: 1px dashed #ddd; padding-bottom: 8px;">
+            <div style="margin-bottom: 12px; font-size: 0.95em; border-bottom: 1px dashed #374151; padding-bottom: 8px; color: #E5E7EB;">
                 <b>Jogo ${i + 1}:</b> ${jogoHtml} <br>
-                <span style="font-size: 0.85em; color: ${acertos >= 4 ? '#155724' : '#666'}; font-weight: ${acertos >= 4 ? 'bold' : 'normal'}">
+                <span style="font-size: 0.85em; color: ${acertos >= 4 ? '#34D399' : '#9CA3AF'}; font-weight: ${acertos >= 4 ? 'bold' : 'normal'}">
                     🎯 ${acertos} acertos${faixa}
                 </span>
             </div>
@@ -338,7 +417,7 @@ async function gerarFotoResultado() {
     
     html2canvas(card, {
         scale: 2, // Garante que a imagem fique em HD/Retina
-        backgroundColor: '#ffffff',
+        backgroundColor: '#121214', // Mantém o fundo escuro consistente
         useCORS: true
     }).then(canvas => {
         // Remove a classe para os botões voltarem a aparecer normalmente na sua tela
