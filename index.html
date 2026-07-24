@@ -120,12 +120,17 @@
     <div id="status">Clique abaixo para buscar o último sorteio</div>
     <button class="btn-api" onclick="buscarUltimoResultado()">🔄 Buscar Resultado Oficial</button>
 
+    <!-- Concurso, Restantes e Acumulou lado a lado -->
     <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-        <div style="flex: 1.5;"><label>Concurso</label><input type="number" id="concurso"></div>
-        <div style="flex: 1;"><label>Restantes</label><input type="number" id="restantes" value="12" oninput="salvarRestantes(this.value)"></div>
+        <div style="flex: 1.2;"><label>Concurso</label><input type="number" id="concurso"></div>
+        <div style="flex: 0.9;"><label>Restantes</label><input type="number" id="restantes" value="12" oninput="salvarRestantes(this.value)"></div>
+        <div style="flex: 1.1;"><label>Acumulou?</label><input type="text" id="acumulou" readonly style="font-weight: bold; text-align: center;"></div>
     </div>
 
-    <div class="input-group"><label>Prêmio do Concurso (R$)</label><input type="text" id="premio"></div>
+    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+        <div style="flex: 1;"><label>Prêmio Sorteado (R$)</label><input type="text" id="premio"></div>
+        <div style="flex: 1;"><label>Próximo Prêmio (R$)</label><input type="text" id="proximo-premio"></div>
+    </div>
 
     <label>Números Sorteados</label>
     <div class="sorteados-container">
@@ -152,9 +157,6 @@ const meusJogos = [
     [10, 13, 23, 24, 34, 53],
     [01, 06, 14, 17, 24, 57]
 ];
-
-// Variável para guardar o status de acumulado
-let statusAcumuladoTexto = "";
 
 document.addEventListener('DOMContentLoaded', () => {
     const salvosRestantes = localStorage.getItem('mega_restantes');
@@ -187,33 +189,45 @@ async function buscarUltimoResultado() {
         const currentConcurso = data.concurso;
         document.getElementById('concurso').value = currentConcurso;
         
+        // Renderiza dezenas
         const dezenas = data.dezenas;
         for (let i = 1; i <= 6; i++) {
             document.getElementById('s' + i).value = parseInt(dezenas[i-1]);
         }
         
-        // Verifica se acumulou no concurso buscado
+        // Verifica se acumulou e define o campo separado
         const acumulou = data.acumulou || (data.premiacoes && data.premiacoes[0] && data.premiacoes[0].ganhadores === 0);
-        statusAcumuladoTexto = acumulou ? "(ACUMULOU! 🚀)" : "(TEVE GANHADOR! 🎯)";
+        const inputAcumulou = document.getElementById('acumulou');
+        if (acumulou) {
+            inputAcumulou.value = "SIM! 🚀";
+            inputAcumulou.style.color = "#2ebd59";
+        } else {
+            inputAcumulou.value = "NÃO 🎯";
+            inputAcumulou.style.color = "#60A5FA";
+        }
 
-        let valorPremioReal = null;
+        // Prêmio do Concurso Sorteado
+        const valorSorteado = data.valorArrecadado || data.premiacoes[0].valorPremio || 0;
+        
+        // Busca do concurso anterior para prêmio real estimado do próximo
+        let valorProximoReal = null;
         try {
             const prevResponse = await fetch(`https://loteriascaixa-api.herokuapp.com/api/megasena/${currentConcurso - 1}`);
             if (prevResponse.ok) {
                 const prevData = await prevResponse.json();
-                valorPremioReal = prevData.valorEstimadoProximoConcurso;
+                valorProximoReal = prevData.valorEstimadoProximoConcurso;
             }
         } catch (prevError) {
-            console.warn("Não foi possível acessar o concurso anterior para validar o prêmio real:", prevError);
+            console.warn("Não foi possível acessar o concurso anterior:", prevError);
         }
         
-        const valorFinal = valorPremioReal || data.valorEstimadoProximoConcurso || data.valorAcumuladoProximoConcurso || 0;
-        const valorFormatado = valorFinal.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+        const valorProximoFinal = valorProximoReal || data.valorEstimadoProximoConcurso || data.valorAcumuladoProximoConcurso || 0;
         
-        // Atualiza a tela com o valor e a tag de acumulado
-        document.getElementById('premio').value = `${valorFormatado} ${statusAcumuladoTexto}`;
+        // Preenche os dois campos de prêmio
+        document.getElementById('premio').value = (data.valorEstimadoProximoConcurso || data.valorAcumuladoProximoConcurso || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+        document.getElementById('proximo-premio').value = valorProximoFinal.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
         
-        status.innerText = `Concurso ${currentConcurso} carregado com sucesso! ${statusAcumuladoTexto}`;
+        status.innerText = `Concurso ${currentConcurso} carregado com sucesso!`;
         status.style.color = "#2ebd59";
         
     } catch (error) {
@@ -272,6 +286,8 @@ function conferir() {
 function copiarWhatsApp() {
     const conc = document.getElementById('concurso').value || "---";
     const prem = document.getElementById('premio').value || "---";
+    const proxPrem = document.getElementById('proximo-premio').value || "---";
+    const acumu = document.getElementById('acumulou').value || "---";
     const rest = document.getElementById('restantes').value || "---";
     const sorteados = getSorteados();
 
@@ -282,7 +298,7 @@ function copiarWhatsApp() {
 
     const sorteadosStr = sorteados.map(n => n.toString().padStart(2, '0')).join(' ');
 
-    let texto = `🍀 *RESUMO MEGA-SENA*\n🔢 *Concurso:* ${conc}\n💰 *Prêmio:* R$ ${prem}\n✨ *Resultado:* ${sorteadosStr}\n--------------------------\n`;
+    let texto = `🍀 *RESUMO MEGA-SENA*\n🔢 *Concurso:* ${conc}\n💰 *Prêmio Concurso:* R$ ${prem}\n🚀 *Acumulou:* ${acumu}\n🔮 *Próximo Prêmio:* R$ ${proxPrem}\n✨ *Resultado:* ${sorteadosStr}\n--------------------------\n`;
     
     meusJogos.forEach((jogo) => {
         const acertos = jogo.filter(n => sorteados.includes(n)).length;
@@ -359,4 +375,4 @@ async function gerarFotoResultado() {
 }
 </script>
 </body>
-</html>
+    </html>
