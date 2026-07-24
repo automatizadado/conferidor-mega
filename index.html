@@ -125,6 +125,7 @@
         <div style="flex: 1;"><label>Restantes</label><input type="number" id="restantes" value="12" oninput="salvarRestantes(this.value)"></div>
     </div>
 
+    <!-- Prêmio do Concurso Atual -->
     <div class="input-group"><label>Prêmio do Concurso (R$)</label><input type="text" id="premio"></div>
 
     <label>Números Sorteados</label>
@@ -133,14 +134,14 @@
         <input type="number" id="s4" min="1" max="60"><input type="number" id="s5" min="1" max="60"><input type="number" id="s6" min="1" max="60">
     </div>
 
-    <!-- NOVOS CAMPOS ABAIXO DOS NÚMEROS (LINHA VERMELHA E LINHA AMARELA) -->
+    <!-- CAMPOS ABAIXO DOS NÚMEROS -->
     <div style="display: flex; gap: 10px; margin-top: 12px;">
-        <!-- Linha Vermelha: Status de Acumulado -->
+        <!-- Status do Concurso -->
         <div style="flex: 1;">
             <label>Status</label>
             <input type="text" id="status-acumulou" readonly style="font-weight: bold; text-align: center;">
         </div>
-        <!-- Linha Amarela: Próximo Prêmio (se acumular) -->
+        <!-- Próximo Prêmio Estimado / Acumulado -->
         <div style="flex: 1.2;">
             <label>Próximo Prêmio (R$)</label>
             <input type="text" id="proximo-premio" readonly style="font-weight: bold; color: #F59E0B;">
@@ -198,12 +199,13 @@ async function buscarUltimoResultado() {
         const currentConcurso = data.concurso;
         document.getElementById('concurso').value = currentConcurso;
         
+        // Renderiza dezenas
         const dezenas = data.dezenas;
         for (let i = 1; i <= 6; i++) {
             document.getElementById('s' + i).value = parseInt(dezenas[i-1]);
         }
         
-        // Trata status de acumulado (Linha Vermelha)
+        // Trata status de acumulado
         const acumulou = data.acumulou || (data.premiacoes && data.premiacoes[0] && data.premiacoes[0].ganhadores === 0);
         const campoStatusAcumulou = document.getElementById('status-acumulou');
         
@@ -215,11 +217,7 @@ async function buscarUltimoResultado() {
             campoStatusAcumulou.style.color = "#60A5FA";
         }
 
-        // Prêmio do Concurso Atual
-        const valorAtual = data.valorEstimadoProximoConcurso || data.valorAcumuladoProximoConcurso || 0;
-        document.getElementById('premio').value = valorAtual.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-
-        // Busca valor real do próximo prêmio (Linha Amarela)
+        // 1. CORREÇÃO: Busca o prêmio real estimado para o PRÓXIMO concurso (via N-1)
         let valorProximoReal = null;
         try {
             const prevResponse = await fetch(`https://loteriascaixa-api.herokuapp.com/api/megasena/${currentConcurso - 1}`);
@@ -228,11 +226,15 @@ async function buscarUltimoResultado() {
                 valorProximoReal = prevData.valorEstimadoProximoConcurso;
             }
         } catch (prevError) {
-            console.warn("Falha secundária:", prevError);
+            console.warn("Falha ao buscar concurso anterior:", prevError);
         }
-        
-        const valorProximoFinal = valorProximoReal || data.valorEstimadoProximoConcurso || 0;
-        document.getElementById('proximo-premio').value = valorProximoFinal.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+
+        // 2. CORREÇÃO: Prêmio sorteado no concurso atual (62M) vs Prêmio Estimado Próximo (70M)
+        const valorConcursoAtual = valorProximoReal || data.valorEstimadoProximoConcurso || 0;
+        const valorProximoEstimado = data.valorEstimadoProximoConcurso || data.valorAcumuladoProximoConcurso || 0;
+
+        document.getElementById('premio').value = valorConcursoAtual.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+        document.getElementById('proximo-premio').value = valorProximoEstimado.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
         
         status.innerText = `Concurso ${currentConcurso} carregado com sucesso!`;
         status.style.color = "#2ebd59";
