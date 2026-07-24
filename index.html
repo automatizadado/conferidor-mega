@@ -120,22 +120,31 @@
     <div id="status">Clique abaixo para buscar o último sorteio</div>
     <button class="btn-api" onclick="buscarUltimoResultado()">🔄 Buscar Resultado Oficial</button>
 
-    <!-- Concurso, Restantes e Acumulou lado a lado -->
     <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-        <div style="flex: 1.2;"><label>Concurso</label><input type="number" id="concurso"></div>
-        <div style="flex: 0.9;"><label>Restantes</label><input type="number" id="restantes" value="12" oninput="salvarRestantes(this.value)"></div>
-        <div style="flex: 1.1;"><label>Acumulou?</label><input type="text" id="acumulou" readonly style="font-weight: bold; text-align: center;"></div>
+        <div style="flex: 1.5;"><label>Concurso</label><input type="number" id="concurso"></div>
+        <div style="flex: 1;"><label>Restantes</label><input type="number" id="restantes" value="12" oninput="salvarRestantes(this.value)"></div>
     </div>
 
-    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-        <div style="flex: 1;"><label>Prêmio Sorteado (R$)</label><input type="text" id="premio"></div>
-        <div style="flex: 1;"><label>Próximo Prêmio (R$)</label><input type="text" id="proximo-premio"></div>
-    </div>
+    <div class="input-group"><label>Prêmio do Concurso (R$)</label><input type="text" id="premio"></div>
 
     <label>Números Sorteados</label>
     <div class="sorteados-container">
         <input type="number" id="s1" min="1" max="60"><input type="number" id="s2" min="1" max="60"><input type="number" id="s3" min="1" max="60">
         <input type="number" id="s4" min="1" max="60"><input type="number" id="s5" min="1" max="60"><input type="number" id="s6" min="1" max="60">
+    </div>
+
+    <!-- NOVOS CAMPOS ABAIXO DOS NÚMEROS (LINHA VERMELHA E LINHA AMARELA) -->
+    <div style="display: flex; gap: 10px; margin-top: 12px;">
+        <!-- Linha Vermelha: Status de Acumulado -->
+        <div style="flex: 1;">
+            <label>Status</label>
+            <input type="text" id="status-acumulou" readonly style="font-weight: bold; text-align: center;">
+        </div>
+        <!-- Linha Amarela: Próximo Prêmio (se acumular) -->
+        <div style="flex: 1.2;">
+            <label>Próximo Prêmio (R$)</label>
+            <input type="text" id="proximo-premio" readonly style="font-weight: bold; color: #F59E0B;">
+        </div>
     </div>
 
     <button class="btn-check" style="margin-top: 20px;" onclick="conferir()">Conferir Meus Jogos 🎯</button>
@@ -189,27 +198,28 @@ async function buscarUltimoResultado() {
         const currentConcurso = data.concurso;
         document.getElementById('concurso').value = currentConcurso;
         
-        // Renderiza dezenas
         const dezenas = data.dezenas;
         for (let i = 1; i <= 6; i++) {
             document.getElementById('s' + i).value = parseInt(dezenas[i-1]);
         }
         
-        // Verifica se acumulou e define o campo separado
+        // Trata status de acumulado (Linha Vermelha)
         const acumulou = data.acumulou || (data.premiacoes && data.premiacoes[0] && data.premiacoes[0].ganhadores === 0);
-        const inputAcumulou = document.getElementById('acumulou');
+        const campoStatusAcumulou = document.getElementById('status-acumulou');
+        
         if (acumulou) {
-            inputAcumulou.value = "SIM! 🚀";
-            inputAcumulou.style.color = "#2ebd59";
+            campoStatusAcumulou.value = "ACUMULOU! 🚀";
+            campoStatusAcumulou.style.color = "#2ebd59";
         } else {
-            inputAcumulou.value = "NÃO 🎯";
-            inputAcumulou.style.color = "#60A5FA";
+            campoStatusAcumulou.value = "SAIU PRÊMIO! 🎯";
+            campoStatusAcumulou.style.color = "#60A5FA";
         }
 
-        // Prêmio do Concurso Sorteado
-        const valorSorteado = data.valorArrecadado || data.premiacoes[0].valorPremio || 0;
-        
-        // Busca do concurso anterior para prêmio real estimado do próximo
+        // Prêmio do Concurso Atual
+        const valorAtual = data.valorEstimadoProximoConcurso || data.valorAcumuladoProximoConcurso || 0;
+        document.getElementById('premio').value = valorAtual.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+
+        // Busca valor real do próximo prêmio (Linha Amarela)
         let valorProximoReal = null;
         try {
             const prevResponse = await fetch(`https://loteriascaixa-api.herokuapp.com/api/megasena/${currentConcurso - 1}`);
@@ -218,13 +228,10 @@ async function buscarUltimoResultado() {
                 valorProximoReal = prevData.valorEstimadoProximoConcurso;
             }
         } catch (prevError) {
-            console.warn("Não foi possível acessar o concurso anterior:", prevError);
+            console.warn("Falha secundária:", prevError);
         }
         
-        const valorProximoFinal = valorProximoReal || data.valorEstimadoProximoConcurso || data.valorAcumuladoProximoConcurso || 0;
-        
-        // Preenche os dois campos de prêmio
-        document.getElementById('premio').value = (data.valorEstimadoProximoConcurso || data.valorAcumuladoProximoConcurso || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+        const valorProximoFinal = valorProximoReal || data.valorEstimadoProximoConcurso || 0;
         document.getElementById('proximo-premio').value = valorProximoFinal.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
         
         status.innerText = `Concurso ${currentConcurso} carregado com sucesso!`;
@@ -286,8 +293,8 @@ function conferir() {
 function copiarWhatsApp() {
     const conc = document.getElementById('concurso').value || "---";
     const prem = document.getElementById('premio').value || "---";
+    const statusAcum = document.getElementById('status-acumulou').value || "---";
     const proxPrem = document.getElementById('proximo-premio').value || "---";
-    const acumu = document.getElementById('acumulou').value || "---";
     const rest = document.getElementById('restantes').value || "---";
     const sorteados = getSorteados();
 
@@ -298,7 +305,7 @@ function copiarWhatsApp() {
 
     const sorteadosStr = sorteados.map(n => n.toString().padStart(2, '0')).join(' ');
 
-    let texto = `🍀 *RESUMO MEGA-SENA*\n🔢 *Concurso:* ${conc}\n💰 *Prêmio Concurso:* R$ ${prem}\n🚀 *Acumulou:* ${acumu}\n🔮 *Próximo Prêmio:* R$ ${proxPrem}\n✨ *Resultado:* ${sorteadosStr}\n--------------------------\n`;
+    let texto = `🍀 *RESUMO MEGA-SENA*\n🔢 *Concurso:* ${conc}\n💰 *Prêmio Concurso:* R$ ${prem}\n✨ *Resultado:* ${sorteadosStr}\n🚀 *Status:* ${statusAcum}\n🔮 *Próximo Prêmio:* R$ ${proxPrem}\n--------------------------\n`;
     
     meusJogos.forEach((jogo) => {
         const acertos = jogo.filter(n => sorteados.includes(n)).length;
@@ -375,4 +382,4 @@ async function gerarFotoResultado() {
 }
 </script>
 </body>
-    </html>
+</html>
