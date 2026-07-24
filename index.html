@@ -9,7 +9,7 @@
         /* --- ESTILO GLOBAL DARK MODE --- */
         body { 
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
-            background: #000000; /* Fundo preto total */
+            background: #000000; 
             color: #E5E7EB; 
             padding: 15px; 
             display: flex; 
@@ -19,7 +19,6 @@
             align-items: center;
         }
 
-        /* --- CARTÃO DE CONFERÊNCIA ESCURO --- */
         .card { 
             background: #121214; 
             padding: 25px; 
@@ -31,7 +30,6 @@
             border-top: 8px solid #2ebd59; 
         }
 
-        /* --- TÍTULO CONFORME SOLICITADO --- */
         h2 { 
             color: #2ebd59; 
             text-align: center; 
@@ -48,7 +46,6 @@
         .input-group { margin-bottom: 12px; }
         label { display: block; font-size: 0.85em; color: #9CA3AF; font-weight: bold; margin-bottom: 4px; }
 
-        /* --- INPUTS NO ESTILO DARK --- */
         input { 
             padding: 12px; 
             border: 1px solid #374151; 
@@ -67,19 +64,17 @@
             box-shadow: 0 0 0 3px rgba(46, 189, 89, 0.2); 
         }
 
-        /* --- CONTEINER DE SORTEADOS COM CONTORNO NEON --- */
         .sorteados-container { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-top: 5px; }
         .sorteados-container input { 
             text-align: center; 
             padding: 10px 2px; 
             font-weight: bold; 
             background: #111827; 
-            border: 1px solid #2ebd59; /* Borda verde neon nativa */
+            border: 1px solid #2ebd59; 
             border-radius: 8px; 
             color: #FFFFFF;
         }
         
-        /* --- ESTILIZAÇÃO PREMIUM DOS BOTÕES --- */
         button { 
             width: 100%; 
             padding: 15px 20px; 
@@ -96,82 +91,18 @@
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        button:hover { 
-            transform: translateY(-2px); 
-        }
-        button:active { 
-            transform: translateY(1px); 
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
-        }
+        button:hover { transform: translateY(-2px); }
+        button:active { transform: translateY(1px); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important; }
 
-        /* Botão Buscar (Azul Gradiente) */
-        .btn-api { 
-            background: linear-gradient(135deg, #0088ff, #0055ff); 
-            color: white; 
-            margin-bottom: 12px; 
-            box-shadow: 0 4px 14px rgba(0, 85, 255, 0.25);
-        }
-        .btn-api:hover {
-            box-shadow: 0 6px 20px rgba(0, 85, 255, 0.35);
-        }
+        .btn-api { background: linear-gradient(135deg, #0088ff, #0055ff); color: white; margin-bottom: 12px; box-shadow: 0 4px 14px rgba(0, 85, 255, 0.25); }
+        .btn-check { background: linear-gradient(135deg, #2ebd59, #1b5e20); color: white; box-shadow: 0 4px 14px rgba(46, 189, 89, 0.25); }
+        .btn-whatsapp { background: linear-gradient(135deg, #25d366, #128c7e); color: white; display: none; margin-top: 15px; box-shadow: 0 4px 14px rgba(37, 211, 102, 0.25); }
+        .btn-foto { background: linear-gradient(135deg, #00b4db, #0083b0); color: white; display: none; margin-top: 10px; box-shadow: 0 4px 14px rgba(0, 180, 219, 0.25); }
 
-        /* Botão Conferir (Verde Floresta Gradiente) */
-        .btn-check { 
-            background: linear-gradient(135deg, #2ebd59, #1b5e20); 
-            color: white; 
-            box-shadow: 0 4px 14px rgba(46, 189, 89, 0.25);
-        }
-        .btn-check:hover {
-            box-shadow: 0 6px 20px rgba(46, 189, 89, 0.35);
-        }
-
-        /* Botão WhatsApp (Verde WhatsApp) */
-        .btn-whatsapp { 
-            background: linear-gradient(135deg, #25d366, #128c7e); 
-            color: white; 
-            display: none; 
-            margin-top: 15px; 
-            box-shadow: 0 4px 14px rgba(37, 211, 102, 0.25);
-        }
-        .btn-whatsapp:hover {
-            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.35);
-        }
-
-        /* Botão Salvar Imagem (Ciano) */
-        .btn-foto { 
-            background: linear-gradient(135deg, #00b4db, #0083b0); 
-            color: white; 
-            display: none; 
-            margin-top: 10px; 
-            box-shadow: 0 4px 14px rgba(0, 180, 219, 0.25);
-        }
-        .btn-foto:hover {
-            box-shadow: 0 6px 20px rgba(0, 180, 219, 0.35);
-        }
-
-        /* --- RESULTADOS --- */
-        .resultado { 
-            margin-top: 20px; 
-            padding: 18px; 
-            background: #111827; 
-            border-radius: 12px; 
-            display: none; 
-            border: 1px solid #374151; 
-        }
-        .alerta-vitoria { 
-            background: #064E3B; 
-            color: #A7F3D0; 
-            padding: 12px; 
-            border-radius: 8px; 
-            border: 1px solid #047857; 
-            margin-top: 15px; 
-            font-weight: bold; 
-            text-align: center; 
-            display: none; 
-        }
+        .resultado { margin-top: 20px; padding: 18px; background: #111827; border-radius: 12px; display: none; border: 1px solid #374151; }
+        .alerta-vitoria { background: #064E3B; color: #A7F3D0; padding: 12px; border-radius: 8px; border: 1px solid #047857; margin-top: 15px; font-weight: bold; text-align: center; display: none; }
         #status { font-size: 0.85em; text-align: center; color: #9CA3AF; margin-bottom: 12px; font-weight: 500; }
 
-        /* Estilos temporários para a captura */
         .card.capturando .btn-api,
         .card.capturando .btn-check,
         .card.capturando .btn-whatsapp,
@@ -184,7 +115,7 @@
 <body>
 
 <div class="card">
-    <h2>🍀 Conferidor Mega-Sena 🍀</h2>
+    <h2>🍀 💰 Conferidor Mega-Sena 💰 🍀</h2>
     
     <div id="status">Clique abaixo para buscar o último sorteio</div>
     <button class="btn-api" onclick="buscarUltimoResultado()">🔄 Buscar Resultado Oficial</button>
@@ -214,16 +145,17 @@
 </div>
 
 <script>
-// Lista dos seus jogos cadastrados
 const meusJogos = [
     [17, 23, 36, 37, 45, 53],
     [05, 10, 27, 37, 40, 58],
     [11, 19, 25, 33, 45, 46],
-    [05, 10, 23, 37, 40, 53],
+    [10, 13, 23, 24, 34, 53],
     [01, 06, 14, 17, 24, 57]
 ];
 
-// Carrega o número de sorteios restantes salvo no navegador ao abrir a página
+// Variável para guardar o status de acumulado
+let statusAcumuladoTexto = "";
+
 document.addEventListener('DOMContentLoaded', () => {
     const salvosRestantes = localStorage.getItem('mega_restantes');
     if (salvosRestantes !== null) {
@@ -231,12 +163,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Salva o valor de sorteios restantes dinamicamente
 function salvarRestantes(valor) {
     localStorage.setItem('mega_restantes', valor);
 }
 
-// Captura as dezenas digitadas ou buscadas nos inputs de sorteio
 function getSorteados() {
     return [
         parseInt(document.getElementById('s1').value), parseInt(document.getElementById('s2').value),
@@ -245,34 +175,27 @@ function getSorteados() {
     ].filter(n => !isNaN(n));
 }
 
-// Busca o resultado na API
 async function buscarUltimoResultado() {
     const status = document.getElementById('status');
     status.innerText = "Buscando concurso mais recente...";
     status.style.color = "#9CA3AF";
     
     try {
-        // 1. Busca o concurso mais recente (N)
         const response = await fetch('https://loteriascaixa-api.herokuapp.com/api/megasena/latest');
         const data = await response.json();
         
         const currentConcurso = data.concurso;
         document.getElementById('concurso').value = currentConcurso;
         
-        const inputDataSorteio = document.getElementById('data-sorteio');
-        if (inputDataSorteio) {
-            inputDataSorteio.value = data.data || "";
-        }
-        
-        // Renderiza as dezenas sorteadas nos inputs
         const dezenas = data.dezenas;
         for (let i = 1; i <= 6; i++) {
             document.getElementById('s' + i).value = parseInt(dezenas[i-1]);
         }
         
-        status.innerText = `Concurso ${currentConcurso} carregado! Buscando prêmio acumulado...`;
-        
-        // 2. Busca o concurso anterior (N-1) para descobrir o prêmio estimado para o concurso atual
+        // Verifica se acumulou no concurso buscado
+        const acumulou = data.acumulou || (data.premiacoes && data.premiacoes[0] && data.premiacoes[0].ganhadores === 0);
+        statusAcumuladoTexto = acumulou ? "(ACUMULOU! 🚀)" : "(TEVE GANHADOR! 🎯)";
+
         let valorPremioReal = null;
         try {
             const prevResponse = await fetch(`https://loteriascaixa-api.herokuapp.com/api/megasena/${currentConcurso - 1}`);
@@ -284,18 +207,14 @@ async function buscarUltimoResultado() {
             console.warn("Não foi possível acessar o concurso anterior para validar o prêmio real:", prevError);
         }
         
-        // 3. Aplica o valor encontrado ou usa o fallback do próprio concurso caso a segunda requisição falhe
-        if (valorPremioReal) {
-            document.getElementById('premio').value = valorPremioReal.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-            status.innerText = `Resultado e prêmio real do concurso ${currentConcurso} carregados com sucesso!`;
-            status.style.color = "#2ebd59";
-        } else {
-            // Fallback
-            const fallbackPremio = data.valorEstimadoProximoConcurso || data.valorAcumuladoProximoConcurso || 0;
-            document.getElementById('premio').value = fallbackPremio.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-            status.innerText = `Resultado carregado (Prêmio obtido via estimativa de contingência).`;
-            status.style.color = "orange";
-        }
+        const valorFinal = valorPremioReal || data.valorEstimadoProximoConcurso || data.valorAcumuladoProximoConcurso || 0;
+        const valorFormatado = valorFinal.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+        
+        // Atualiza a tela com o valor e a tag de acumulado
+        document.getElementById('premio').value = `${valorFormatado} ${statusAcumuladoTexto}`;
+        
+        status.innerText = `Concurso ${currentConcurso} carregado com sucesso! ${statusAcumuladoTexto}`;
+        status.style.color = "#2ebd59";
         
     } catch (error) {
         status.innerText = "Erro ao buscar dados. Digite os números manualmente.";
@@ -303,7 +222,6 @@ async function buscarUltimoResultado() {
     }
 }
 
-// Realiza a conferência exibindo o resultado na tela
 function conferir() {
     const sorteados = getSorteados();
 
@@ -318,7 +236,6 @@ function conferir() {
     meusJogos.forEach((jogo, i) => {
         let acertos = 0;
         
-        // Renderiza as dezenas destacando em verde com texto preto as dezenas acertadas
         const jogoHtml = jogo.map(n => {
             const dezenaFormatada = n.toString().padStart(2, '0');
             if (sorteados.includes(n)) {
@@ -330,7 +247,6 @@ function conferir() {
 
         if (acertos >= 4) ganhou = true;
 
-        // Identifica faixas de premiação
         let faixa = "";
         if (acertos === 4) faixa = " (🏅 QUADRA!)";
         else if (acertos === 5) faixa = " (🔥 QUINA!!)";
@@ -349,11 +265,10 @@ function conferir() {
     document.getElementById('lista-acertos').innerHTML = html;
     document.getElementById('resultado-box').style.display = 'block';
     document.getElementById('btn-wa').style.display = 'block';
-    document.getElementById('btn-foto').style.display = 'block'; // Ativa o botão da foto
+    document.getElementById('btn-foto').style.display = 'block';
     document.getElementById('alerta').style.display = ganhou ? 'block' : 'none';
 }
 
-// Copia o resumo com formatação limpa para a área de transferência
 function copiarWhatsApp() {
     const conc = document.getElementById('concurso').value || "---";
     const prem = document.getElementById('premio').value || "---";
@@ -367,10 +282,7 @@ function copiarWhatsApp() {
 
     const sorteadosStr = sorteados.map(n => n.toString().padStart(2, '0')).join(' ');
 
-    const inputDataSorteio = document.getElementById('data-sorteio');
-    const dataTexto = inputDataSorteio && inputDataSorteio.value ? ` (${inputDataSorteio.value})` : "";
-
-    let texto = `🍀 *RESUMO MEGA-SENA*\n🔢 *Concurso:* ${conc}${dataTexto}\n💰 *Prêmio:* R$ ${prem}\n✨ *Resultado:* ${sorteadosStr}\n--------------------------\n`;
+    let texto = `🍀 *RESUMO MEGA-SENA*\n🔢 *Concurso:* ${conc}\n💰 *Prêmio:* R$ ${prem}\n✨ *Resultado:* ${sorteadosStr}\n--------------------------\n`;
     
     meusJogos.forEach((jogo) => {
         const acertos = jogo.filter(n => sorteados.includes(n)).length;
@@ -398,58 +310,50 @@ function copiarWhatsApp() {
     navigator.clipboard.writeText(texto).then(() => {
         alert("Resumo de conferência copiado para o WhatsApp!");
     }).catch(err => {
-        alert("Erro ao copiar automaticamente. Tente selecionar o texto manual.");
+        alert("Erro ao copiar automaticamente.");
     });
 }
 
-// Tira o print automático recortado da área de resultado e copia/baixa
 async function gerarFotoResultado() {
     const card = document.querySelector('.card');
     const btnFoto = document.getElementById('btn-foto');
     
     btnFoto.innerText = "Gerando Imagem... ⌛";
-    
-    // Adiciona classe CSS para esconder os botões durante a captura
     card.classList.add('capturando');
     
-    // Pequeno delay (150ms) para que o navegador processe a alteração visual antes da captura
     await new Promise(resolve => setTimeout(resolve, 150));
     
     html2canvas(card, {
-        scale: 2, // Garante que a imagem fique em HD/Retina
-        backgroundColor: '#121214', // Mantém o fundo escuro consistente
+        scale: 2,
+        backgroundColor: '#121214',
         useCORS: true
     }).then(canvas => {
-        // Remove a classe para os botões voltarem a aparecer normalmente na sua tela
         card.classList.remove('capturando');
         btnFoto.innerText = "Salvar Imagem do Resultado 📸";
         
         const nConcurso = document.getElementById('concurso').value || "Mega";
         const nomeArquivo = `Resultado_Mega_Concurso_${nConcurso}.png`;
         
-        // 1. Trata o download automático da imagem
         const link = document.createElement('a');
         link.download = nomeArquivo;
         link.href = canvas.toDataURL('image/png');
         link.click();
         
-        // 2. Tenta copiar diretamente para a área de transferência do celular/PC
         canvas.toBlob(blob => {
             try {
                 const item = new ClipboardItem({ "image/png": blob });
                 navigator.clipboard.write([item]).then(() => {
-                    alert("Imagem gerada e salva com sucesso! Ela também foi COPIADA para a sua área de transferência. Basta ir no WhatsApp e dar 'Colar' (Ctrl+V). 😉");
+                    alert("Imagem gerada, salva e copiada! Só dar 'Colar' no WhatsApp. 😉");
                 });
             } catch (e) {
-                // Caso o navegador local não permita a gravação direta de blobs na clipboard (segurança de alguns navegadores mobile)
-                alert("Imagem gerada e baixada com sucesso! Você já pode enviá-la pelo WhatsApp.");
+                alert("Imagem baixada com sucesso!");
             }
         }, 'image/png');
         
     }).catch(err => {
         card.classList.remove('capturando');
         btnFoto.innerText = "Salvar Imagem do Resultado 📸";
-        alert("Não foi possível gerar a imagem automaticamente no seu navegador. Use o print clássico do celular.");
+        alert("Erro ao gerar imagem.");
         console.error(err);
     });
 }
