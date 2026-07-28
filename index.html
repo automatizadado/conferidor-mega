@@ -129,7 +129,7 @@
 
     <div style="display: flex; gap: 10px; margin-bottom: 10px;">
         <div style="flex: 1;"><label>Prêmio Sorteado (R$)</label><input type="text" id="premio"></div>
-        <div style="flex: 1;"><label>Próximo Prêmio (R$)</label><input type="text" id="proximo-premio"></div>
+        <div style="flex: 1;"><label>Próximo Prêmio (R$)</label><input type="text" id="proximo-premio" style="color: #F59E0B; font-weight: bold;"></div>
     </div>
 
     <label>Números Sorteados</label>
@@ -206,26 +206,28 @@ async function buscarUltimoResultado() {
             inputAcumulou.style.color = "#60A5FA";
         }
 
-        // Prêmio do Concurso Sorteado
-        const valorSorteado = data.valorArrecadado || data.premiacoes[0].valorPremio || 0;
-        
-        // Busca do concurso anterior para prêmio real estimado do próximo
-        let valorProximoReal = null;
+        // 1. Busca no concurso anterior (N-1) o valor que foi estimado para este concurso (N)
+        let valorPremioConcursoAtual = null;
         try {
             const prevResponse = await fetch(`https://loteriascaixa-api.herokuapp.com/api/megasena/${currentConcurso - 1}`);
             if (prevResponse.ok) {
                 const prevData = await prevResponse.json();
-                valorProximoReal = prevData.valorEstimadoProximoConcurso;
+                valorPremioConcursoAtual = prevData.valorEstimadoProximoConcurso;
             }
         } catch (prevError) {
             console.warn("Não foi possível acessar o concurso anterior:", prevError);
         }
         
-        const valorProximoFinal = valorProximoReal || data.valorEstimadoProximoConcurso || data.valorAcumuladoProximoConcurso || 0;
+        // CORREÇÃO DOS CAMPOS:
+        // Premio Sorteado Neste Concurso (Ex: 62Mi)
+        const valorSorteadoFinal = valorPremioConcursoAtual || data.valorAcumuladoProximoConcurso || 0;
         
-        // Preenche os dois campos de prêmio
-        document.getElementById('premio').value = (data.valorEstimadoProximoConcurso || data.valorAcumuladoProximoConcurso || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-        document.getElementById('proximo-premio').value = valorProximoFinal.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+        // Estimativa para o Próximo Concurso (Ex: 70Mi)
+        const valorProximoEstimado = data.valorEstimadoProximoConcurso || 0;
+        
+        // Preenche os inputs corretamente sem inverter
+        document.getElementById('premio').value = valorSorteadoFinal.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+        document.getElementById('proximo-premio').value = valorProximoEstimado.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
         
         status.innerText = `Concurso ${currentConcurso} carregado com sucesso!`;
         status.style.color = "#2ebd59";
