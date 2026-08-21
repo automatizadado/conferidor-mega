@@ -187,20 +187,24 @@ async function buscarUltimoResultado() {
     status.style.color = "#9CA3AF";
     
     try {
-        const response = await fetch('https://loteriascaixa-api.herokuapp.com/api/megasena/latest');
+        // URL Oficial da Caixa + Proxy CORS para não ser bloqueado pelo navegador
+        const urlOficial = 'https://servicebus2.caixa.gov.br/portaldeloterias/api/megasena/';
+        const response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(urlOficial)}`);
+        
+        if (!response.ok) throw new Error("Erro na rede ao buscar a API");
         const data = await response.json();
         
-        const currentConcurso = data.concurso;
+        const currentConcurso = data.numero;
         document.getElementById('concurso').value = currentConcurso;
         
         // Renderiza as dezenas sorteadas
-        const dezenas = data.dezenas;
+        const dezenas = data.listaDezenas;
         for (let i = 1; i <= 6; i++) {
             document.getElementById('s' + i).value = parseInt(dezenas[i-1]);
         }
         
         // Verifica se acumulou
-        const acumulou = data.acumulou || (data.premiacoes && data.premiacoes[0] && data.premiacoes[0].ganhadores === 0);
+        const acumulou = data.acumulado;
         const inputAcumulou = document.getElementById('acumulou');
         if (acumulou) {
             inputAcumulou.value = "SIM! 🚀";
@@ -210,25 +214,31 @@ async function buscarUltimoResultado() {
             inputAcumulou.style.color = "#60A5FA";
         }
 
-        // 1. Busca no concurso anterior (N-1) o valor que foi estimado para este concurso atual
+        // Busca no concurso anterior (N-1) o valor que foi estimado para este concurso
         let valorPremioConcursoAtual = null;
         try {
-            const prevResponse = await fetch(`https://loteriascaixa-api.herokuapp.com/api/megasena/${currentConcurso - 1}`);
+            const prevUrl = `https://servicebus2.caixa.gov.br/portaldeloterias/api/megasena/${currentConcurso - 1}`;
+            const prevResponse = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(prevUrl)}`);
             if (prevResponse.ok) {
                 const prevData = await prevResponse.json();
                 valorPremioConcursoAtual = prevData.valorEstimadoProximoConcurso;
             }
         } catch (prevError) {
-            console.warn("Não foi possível acessar o concurso anterior para validar o prêmio real:", prevError);
+            console.warn("Não foi possível acessar o concurso anterior para validar o prêmio real.");
         }
         
-        // Valor Final Sorteado (O prêmio que estava em jogo hoje)
-        const valorSorteadoFinal = valorPremioConcursoAtual || data.valorAcumuladoProximoConcurso || 0;
+        // Define o valor Sorteado Final
+        let valorSorteadoFinal = valorPremioConcursoAtual || data.valorAcumuladoProximoConcurso || 0;
         
-        // Estimativa Final para o Próximo Concurso (O Acumulado para o futuro)
+        // Se alguém ganhou a Sena (não acumulou), pegamos o prêmio exato pago na primeira faixa
+        if (!acumulou && data.listaRateioPremio && data.listaRateioPremio.length > 0) {
+             valorSorteadoFinal = data.listaRateioPremio[0].valorPremio; 
+        }
+        
+        // Estimativa Final para o Próximo Concurso
         const valorProximoEstimado = data.valorEstimadoProximoConcurso || 0;
         
-        // Preenche os campos 
+        // Preenche os campos de valores formatando para Moeda
         document.getElementById('premio').value = valorSorteadoFinal.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
         document.getElementById('proximo-premio').value = valorProximoEstimado.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
         
@@ -236,8 +246,9 @@ async function buscarUltimoResultado() {
         status.style.color = "#2ebd59";
         
     } catch (error) {
-        status.innerText = "Erro ao buscar dados. Digite os números manualmente.";
+        status.innerText = "Erro ao buscar dados da Caixa. Digite os números manualmente.";
         status.style.color = "#EF4444";
+        console.error("Erro Técnico:", error);
     }
 }
 
@@ -380,4 +391,5 @@ async function gerarFotoResultado() {
 }
 </script>
 </body>
-</html>
+    </html>
+    
