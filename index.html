@@ -185,27 +185,35 @@ function getSorteados() {
 // SISTEMA BLINDADO COM 3 ROTAS DE BUSCA
 async function buscarUltimoResultado() {
     const status = document.getElementById('status');
-    status.innerText = "Conectando aos servidores... (Isso pode levar até 20 segundos)";
+    status.innerText = "Conectando aos servidores... (Isso pode levar alguns segundos)";
     status.style.color = "#F59E0B";
 
+    // Novas rotas com servidores mais estáveis e métodos que evitam o bloqueio da Caixa
     const endpoints = [
+        { url: 'https://api.guidi.dev.br/loteria/megasena/ultimo', tipo: 'guidi' },
         { url: 'https://loteriascaixa-api.onrender.com/api/megasena/latest', tipo: 'render' },
-        { url: 'https://api.codetabs.com/v1/proxy?quest=https://servicebus2.caixa.gov.br/portaldeloterias/api/megasena/', tipo: 'caixa' },
-        { url: `https://corsproxy.io/?${encodeURIComponent('https://servicebus2.caixa.gov.br/portaldeloterias/api/megasena/')}`, tipo: 'caixa' }
+        // AllOrigins usando /get converte para texto, evitando os bloqueios comuns de proxy RAW
+        { url: `https://api.allorigins.win/get?url=${encodeURIComponent('https://servicebus2.caixa.gov.br/portaldeloterias/api/megasena/')}`, tipo: 'allorigins' }
     ];
 
     let sucesso = false;
 
     for (let i = 0; i < endpoints.length; i++) {
         try {
-            console.log(`Tentando caminho ${i + 1}...`);
+            console.log(`Tentando rota ${i + 1} (${endpoints[i].tipo})...`);
             const response = await fetch(endpoints[i].url);
             
-            if (!response.ok) throw new Error("Falha no servidor da tentativa atual.");
-            const data = await response.json();
+            if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+            let data = await response.json();
             
-            if (!data.concurso && !data.numero) throw new Error("Dados inválidos recebidos.");
+            // Se for o AllOrigins, os dados da Caixa vêm empacotados dentro de uma string 'contents'
+            if (endpoints[i].tipo === 'allorigins') {
+                data = JSON.parse(data.contents);
+            }
+            
+            if (!data || (!data.concurso && !data.numero)) throw new Error("Estrutura de dados inválida.");
 
+            // Processamento baseado no formato da API que respondeu
             if (endpoints[i].tipo === 'render') {
                 document.getElementById('concurso').value = data.concurso;
                 for (let j = 1; j <= 6; j++) {
@@ -216,8 +224,8 @@ async function buscarUltimoResultado() {
                 
                 document.getElementById('premio').value = (data.valorAcumuladoProximoConcurso || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
                 document.getElementById('proximo-premio').value = (data.valorEstimadoProximoConcurso || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-
-            } else {
+            } else { 
+                // Formato padrão (Guidi ou Oficial da Caixa via Proxy)
                 document.getElementById('concurso').value = data.numero;
                 for (let j = 1; j <= 6; j++) {
                     document.getElementById('s' + j).value = parseInt(data.listaDezenas[j-1]);
@@ -236,15 +244,15 @@ async function buscarUltimoResultado() {
             status.innerText = `Sorteio atualizado com sucesso! (Rota ${i + 1})`;
             status.style.color = "#2ebd59";
             sucesso = true;
-            break; 
-
+            break; // Interrompe o loop ao conseguir carregar os dados
+            
         } catch (error) {
-            console.warn(`Rota ${i + 1} falhou. Tentando a próxima...`);
+            console.warn(`Rota ${i + 1} falhou:`, error);
         }
     }
 
     if (!sucesso) {
-        status.innerText = "Rede da Caixa bloqueada no momento. Digite os 6 números à mão.";
+        status.innerText = "Sistemas da Caixa instáveis. Digite os 6 números à mão.";
         status.style.color = "#EF4444";
     }
 }
