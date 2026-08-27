@@ -95,6 +95,7 @@
         button:active { transform: translateY(1px); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important; }
 
         .btn-api { background: linear-gradient(135deg, #0088ff, #0055ff); color: white; margin-bottom: 12px; box-shadow: 0 4px 14px rgba(0, 85, 255, 0.25); }
+        .btn-backup { background: linear-gradient(135deg, #4B5563, #374151); color: white; margin-bottom: 12px; padding: 12px 20px; }
         .btn-check { background: linear-gradient(135deg, #2ebd59, #1b5e20); color: white; box-shadow: 0 4px 14px rgba(46, 189, 89, 0.25); }
         .btn-whatsapp { background: linear-gradient(135deg, #25d366, #128c7e); color: white; display: none; margin-top: 15px; box-shadow: 0 4px 14px rgba(37, 211, 102, 0.25); }
         .btn-foto { background: linear-gradient(135deg, #00b4db, #0083b0); color: white; display: none; margin-top: 10px; box-shadow: 0 4px 14px rgba(0, 180, 219, 0.25); }
@@ -103,7 +104,16 @@
         .alerta-vitoria { background: #064E3B; color: #A7F3D0; padding: 12px; border-radius: 8px; border: 1px solid #047857; margin-top: 15px; font-weight: bold; text-align: center; display: none; }
         #status { font-size: 0.85em; text-align: center; color: #9CA3AF; margin-bottom: 12px; font-weight: 500; }
 
+        .backup-section {
+            border-top: 1px dashed #374151;
+            margin-top: 10px;
+            padding-top: 15px;
+            margin-bottom: 15px;
+        }
+
         .card.capturando .btn-api,
+        .card.capturando .btn-backup,
+        .card.capturando .backup-section,
         .card.capturando .btn-check,
         .card.capturando .btn-whatsapp,
         .card.capturando .btn-foto,
@@ -118,7 +128,17 @@
     <h2>🍀 💰 Conferidor Mega-Sena 💰 🍀</h2>
     
     <div id="status">Clique abaixo para buscar o último sorteio</div>
-    <button class="btn-api" onclick="buscarUltimoResultado()">🔄 Buscar Resultado Oficial</button>
+    
+    <button class="btn-api" onclick="buscarUltimoResultado()">🔄 1. Buscar Automático</button>
+
+    <!-- NOVA SEÇÃO DE BACKUP À PROVA DE FALHAS -->
+    <div class="backup-section">
+        <div style="font-size: 0.8em; color: #9CA3AF; text-align: center; margin-bottom: 8px;">
+            Se o automático falhar: <a href="https://servicebus2.caixa.gov.br/portaldeloterias/api/megasena/" target="_blank" style="color: #60A5FA; font-weight: bold; text-decoration: none;">Clique Aqui</a>, salve a página aberta (Ctrl+S) e importe abaixo:
+        </div>
+        <input type="file" id="arquivo-caixa" accept=".json, .txt, .html" style="display: none;" onchange="importarArquivo(event)">
+        <button class="btn-backup" onclick="document.getElementById('arquivo-caixa').click()">📁 2. Importar Arquivo Baixado</button>
+    </div>
 
     <!-- Concurso, Restantes e Acumulou lado a lado -->
     <div style="display: flex; gap: 10px; margin-bottom: 10px;">
@@ -151,7 +171,6 @@
 </div>
 
 <script>
-// LISTA DE JOGOS E NOMES DOS PARTICIPANTES (SEM ZEROS À ESQUERDA NOS NÚMEROS)
 const meusJogos = [
     { dono: "Victor",  numeros: [1, 6, 14, 17, 24, 57] },
     { dono: "Marcelo", numeros: [5, 10, 23, 37, 40, 53] },
@@ -182,17 +201,17 @@ function getSorteados() {
     ].filter(n => !isNaN(n));
 }
 
-// SISTEMA BLINDADO COM 3 ROTAS DE BUSCA
+// -------------------------------------------------------------
+// FUNÇÃO 1: BUSCA AUTOMÁTICA
+// -------------------------------------------------------------
 async function buscarUltimoResultado() {
     const status = document.getElementById('status');
-    status.innerText = "Conectando aos servidores... (Isso pode levar alguns segundos)";
+    status.innerText = "Conectando aos servidores...";
     status.style.color = "#F59E0B";
 
-    // Novas rotas com servidores mais estáveis e métodos que evitam o bloqueio da Caixa
     const endpoints = [
         { url: 'https://api.guidi.dev.br/loteria/megasena/ultimo', tipo: 'guidi' },
         { url: 'https://loteriascaixa-api.onrender.com/api/megasena/latest', tipo: 'render' },
-        // AllOrigins usando /get converte para texto, evitando os bloqueios comuns de proxy RAW
         { url: `https://api.allorigins.win/get?url=${encodeURIComponent('https://servicebus2.caixa.gov.br/portaldeloterias/api/megasena/')}`, tipo: 'allorigins' }
     ];
 
@@ -200,63 +219,98 @@ async function buscarUltimoResultado() {
 
     for (let i = 0; i < endpoints.length; i++) {
         try {
-            console.log(`Tentando rota ${i + 1} (${endpoints[i].tipo})...`);
             const response = await fetch(endpoints[i].url);
-            
-            if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+            if (!response.ok) throw new Error("HTTP Erro");
             let data = await response.json();
             
-            // Se for o AllOrigins, os dados da Caixa vêm empacotados dentro de uma string 'contents'
-            if (endpoints[i].tipo === 'allorigins') {
-                data = JSON.parse(data.contents);
-            }
-            
-            if (!data || (!data.concurso && !data.numero)) throw new Error("Estrutura de dados inválida.");
+            if (endpoints[i].tipo === 'allorigins') data = JSON.parse(data.contents);
+            if (!data || (!data.concurso && !data.numero)) throw new Error("Inválido");
 
-            // Processamento baseado no formato da API que respondeu
-            if (endpoints[i].tipo === 'render') {
-                document.getElementById('concurso').value = data.concurso;
-                for (let j = 1; j <= 6; j++) {
-                    document.getElementById('s' + j).value = parseInt(data.dezenas[j-1]);
-                }
-                document.getElementById('acumulou').value = data.acumulou ? "SIM! 🚀" : "NÃO 🎯";
-                document.getElementById('acumulou').style.color = data.acumulou ? "#2ebd59" : "#60A5FA";
-                
-                document.getElementById('premio').value = (data.valorAcumuladoProximoConcurso || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-                document.getElementById('proximo-premio').value = (data.valorEstimadoProximoConcurso || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-            } else { 
-                // Formato padrão (Guidi ou Oficial da Caixa via Proxy)
-                document.getElementById('concurso').value = data.numero;
-                for (let j = 1; j <= 6; j++) {
-                    document.getElementById('s' + j).value = parseInt(data.listaDezenas[j-1]);
-                }
-                document.getElementById('acumulou').value = data.acumulado ? "SIM! 🚀" : "NÃO 🎯";
-                document.getElementById('acumulou').style.color = data.acumulado ? "#2ebd59" : "#60A5FA";
+            preencherCamposComData(data, endpoints[i].tipo);
 
-                let valorSorteadoFinal = data.valorAcumuladoProximoConcurso || 0;
-                if (!data.acumulado && data.listaRateioPremio && data.listaRateioPremio.length > 0) {
-                    valorSorteadoFinal = data.listaRateioPremio[0].valorPremio; 
-                }
-                document.getElementById('premio').value = valorSorteadoFinal.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-                document.getElementById('proximo-premio').value = (data.valorEstimadoProximoConcurso || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-            }
-
-            status.innerText = `Sorteio atualizado com sucesso! (Rota ${i + 1})`;
+            status.innerText = `Sorteio atualizado via Automático!`;
             status.style.color = "#2ebd59";
             sucesso = true;
-            break; // Interrompe o loop ao conseguir carregar os dados
-            
+            break; 
         } catch (error) {
-            console.warn(`Rota ${i + 1} falhou:`, error);
+            console.warn(`Tentativa ${i+1} falhou.`);
         }
     }
 
     if (!sucesso) {
-        status.innerText = "Sistemas da Caixa instáveis. Digite os 6 números à mão.";
+        status.innerText = "Sistemas instáveis. Tente usar a Opção 2 (Importar).";
         status.style.color = "#EF4444";
     }
 }
 
+// -------------------------------------------------------------
+// FUNÇÃO 2: IMPORTAÇÃO MANUAL DO ARQUIVO DA CAIXA (NOVO)
+// -------------------------------------------------------------
+function importarArquivo(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            // Se o navegador salvou HTML com a tag <pre> em volta, limpamos:
+            let texto = e.target.result;
+            if (texto.includes("<pre>")) {
+                texto = texto.split("<pre>")[1].split("</pre>")[0];
+            }
+            // Remove tags HTML aleatórias caso existam
+            texto = texto.replace(/(<([^>]+)>)/gi, "");
+            
+            const data = JSON.parse(texto.trim());
+            
+            if (!data.numero && !data.listaDezenas) throw new Error("Estrutura não reconhecida");
+
+            preencherCamposComData(data, 'caixa');
+
+            const status = document.getElementById('status');
+            status.innerText = `Sorteio ${data.numero} importado do arquivo com sucesso!`;
+            status.style.color = "#2ebd59";
+
+        } catch (err) {
+            alert("Erro ao ler o arquivo. Certifique-se de que salvou a página da Caixa corretamente.");
+            console.error(err);
+        }
+        
+        // Limpa o input para poder importar de novo
+        event.target.value = '';
+    };
+    reader.readAsText(file);
+}
+
+// -------------------------------------------------------------
+// FUNÇÃO AUXILIAR: PREENCHE A TELA (Usada tanto pela Rota 1 quanto pela Rota 2)
+// -------------------------------------------------------------
+function preencherCamposComData(data, tipo) {
+    if (tipo === 'render') {
+        document.getElementById('concurso').value = data.concurso;
+        for (let j = 1; j <= 6; j++) { document.getElementById('s' + j).value = parseInt(data.dezenas[j-1]); }
+        document.getElementById('acumulou').value = data.acumulou ? "SIM! 🚀" : "NÃO 🎯";
+        document.getElementById('acumulou').style.color = data.acumulou ? "#2ebd59" : "#60A5FA";
+        document.getElementById('premio').value = (data.valorAcumuladoProximoConcurso || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+        document.getElementById('proximo-premio').value = (data.valorEstimadoProximoConcurso || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+    } else {
+        document.getElementById('concurso').value = data.numero;
+        for (let j = 1; j <= 6; j++) { document.getElementById('s' + j).value = parseInt(data.listaDezenas[j-1]); }
+        document.getElementById('acumulou').value = data.acumulado ? "SIM! 🚀" : "NÃO 🎯";
+        document.getElementById('acumulou').style.color = data.acumulado ? "#2ebd59" : "#60A5FA";
+
+        let valorSorteadoFinal = data.valorAcumuladoProximoConcurso || 0;
+        if (!data.acumulado && data.listaRateioPremio && data.listaRateioPremio.length > 0) {
+            valorSorteadoFinal = data.listaRateioPremio[0].valorPremio; 
+        }
+        document.getElementById('premio').value = valorSorteadoFinal.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+        document.getElementById('proximo-premio').value = (data.valorEstimadoProximoConcurso || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+    }
+}
+
+// -------------------------------------------------------------
+// MÉTODOS DE EXIBIÇÃO E EXPORTAÇÃO
+// -------------------------------------------------------------
 function conferir() {
     const sorteados = getSorteados();
 
