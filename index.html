@@ -151,16 +151,16 @@
 </div>
 
 <script>
-// Lista dos seus jogos (SEM os zeros à esquerda para evitar erros no JavaScript)
+// LISTA DE JOGOS E NOMES DOS PARTICIPANTES (SEM ZEROS À ESQUERDA NOS NÚMEROS)
 const meusJogos = [
-    [17, 23, 36, 37, 45, 53],
-    [5, 10, 27, 37, 40, 58],
-    [11, 19, 25, 33, 45, 46],
-    [5, 10, 23, 37, 40, 53],
-    [1, 6, 14, 17, 24, 57],
-    [3, 8, 9, 23, 30, 34],
-    [4, 6, 16, 32, 38, 50],
-    [5, 10, 17, 22, 33, 38]
+    { dono: "Victor",  numeros: [1, 6, 14, 17, 24, 57] },
+    { dono: "Marcelo", numeros: [5, 10, 23, 37, 40, 53] },
+    { dono: "William", numeros: [17, 23, 36, 37, 45, 53] },
+    { dono: "Paulo",   numeros: [5, 10, 27, 37, 40, 58] },
+    { dono: "Carlos",  numeros: [11, 19, 25, 33, 45, 46] },
+    { dono: "Lau",     numeros: [3, 8, 9, 23, 30, 34] },
+    { dono: "Neto",    numeros: [4, 6, 16, 32, 38, 50] },
+    { dono: "Maycon",  numeros: [5, 10, 17, 22, 33, 38] }
 ];
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -182,82 +182,70 @@ function getSorteados() {
     ].filter(n => !isNaN(n));
 }
 
+// SISTEMA BLINDADO COM 3 ROTAS DE BUSCA
 async function buscarUltimoResultado() {
     const status = document.getElementById('status');
-    status.innerText = "Buscando concurso... (pode levar alguns segundos)";
-    status.style.color = "#9CA3AF";
-    
-    try {
-        // TENTATIVA 1: API Guidi (Espelho ultra rápido da Caixa)
-        const response = await fetch('https://api.guidi.dev.br/loteria/megasena/ultimo');
-        if (!response.ok) throw new Error("API Principal Falhou");
-        
-        const data = await response.json();
-        
-        document.getElementById('concurso').value = data.numero;
-        
-        // Renderiza as dezenas sorteadas
-        const dezenas = data.listaDezenas;
-        for (let i = 1; i <= 6; i++) {
-            document.getElementById('s' + i).value = parseInt(dezenas[i-1]);
-        }
-        
-        // Verifica se acumulou
-        const acumulou = data.acumulado;
-        const inputAcumulou = document.getElementById('acumulou');
-        if (acumulou) {
-            inputAcumulou.value = "SIM! 🚀";
-            inputAcumulou.style.color = "#2ebd59";
-        } else {
-            inputAcumulou.value = "NÃO 🎯";
-            inputAcumulou.style.color = "#60A5FA";
-        }
+    status.innerText = "Conectando aos servidores... (Isso pode levar até 20 segundos)";
+    status.style.color = "#F59E0B";
 
-        // Define os prêmios
-        let valorSorteadoFinal = data.valorAcumuladoProximoConcurso || 0;
-        if (!acumulou && data.listaRateioPremio && data.listaRateioPremio.length > 0) {
-             valorSorteadoFinal = data.listaRateioPremio[0].valorPremio; 
-        }
-        const valorProximoEstimado = data.valorEstimadoProximoConcurso || 0;
-        
-        document.getElementById('premio').value = valorSorteadoFinal.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-        document.getElementById('proximo-premio').value = valorProximoEstimado.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-        
-        status.innerText = `Concurso ${data.numero} carregado com sucesso!`;
-        status.style.color = "#2ebd59";
-        
-    } catch (error) {
-        // TENTATIVA 2 (FALLBACK): Servidor OnRender espelho do Heroku
+    const endpoints = [
+        { url: 'https://loteriascaixa-api.onrender.com/api/megasena/latest', tipo: 'render' },
+        { url: 'https://api.codetabs.com/v1/proxy?quest=https://servicebus2.caixa.gov.br/portaldeloterias/api/megasena/', tipo: 'caixa' },
+        { url: `https://corsproxy.io/?${encodeURIComponent('https://servicebus2.caixa.gov.br/portaldeloterias/api/megasena/')}`, tipo: 'caixa' }
+    ];
+
+    let sucesso = false;
+
+    for (let i = 0; i < endpoints.length; i++) {
         try {
-            status.innerText = "Tentando servidor alternativo...";
-            const res = await fetch('https://loteriascaixa-api.onrender.com/api/megasena/latest');
-            if (!res.ok) throw new Error("API Secundária Falhou");
+            console.log(`Tentando caminho ${i + 1}...`);
+            const response = await fetch(endpoints[i].url);
             
-            const data2 = await res.json();
+            if (!response.ok) throw new Error("Falha no servidor da tentativa atual.");
+            const data = await response.json();
             
-            document.getElementById('concurso').value = data2.concurso;
-            for (let i = 1; i <= 6; i++) {
-                document.getElementById('s' + i).value = parseInt(data2.dezenas[i-1]);
-            }
-            
-            const inputAcumulou2 = document.getElementById('acumulou');
-            if (data2.acumulou) {
-                inputAcumulou2.value = "SIM! 🚀"; inputAcumulou2.style.color = "#2ebd59";
+            if (!data.concurso && !data.numero) throw new Error("Dados inválidos recebidos.");
+
+            if (endpoints[i].tipo === 'render') {
+                document.getElementById('concurso').value = data.concurso;
+                for (let j = 1; j <= 6; j++) {
+                    document.getElementById('s' + j).value = parseInt(data.dezenas[j-1]);
+                }
+                document.getElementById('acumulou').value = data.acumulou ? "SIM! 🚀" : "NÃO 🎯";
+                document.getElementById('acumulou').style.color = data.acumulou ? "#2ebd59" : "#60A5FA";
+                
+                document.getElementById('premio').value = (data.valorAcumuladoProximoConcurso || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                document.getElementById('proximo-premio').value = (data.valorEstimadoProximoConcurso || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+
             } else {
-                inputAcumulou2.value = "NÃO 🎯"; inputAcumulou2.style.color = "#60A5FA";
+                document.getElementById('concurso').value = data.numero;
+                for (let j = 1; j <= 6; j++) {
+                    document.getElementById('s' + j).value = parseInt(data.listaDezenas[j-1]);
+                }
+                document.getElementById('acumulou').value = data.acumulado ? "SIM! 🚀" : "NÃO 🎯";
+                document.getElementById('acumulou').style.color = data.acumulado ? "#2ebd59" : "#60A5FA";
+
+                let valorSorteadoFinal = data.valorAcumuladoProximoConcurso || 0;
+                if (!data.acumulado && data.listaRateioPremio && data.listaRateioPremio.length > 0) {
+                    valorSorteadoFinal = data.listaRateioPremio[0].valorPremio; 
+                }
+                document.getElementById('premio').value = valorSorteadoFinal.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                document.getElementById('proximo-premio').value = (data.valorEstimadoProximoConcurso || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
             }
-            
-            document.getElementById('premio').value = (data2.valorAcumuladoProximoConcurso || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-            document.getElementById('proximo-premio').value = (data2.valorEstimadoProximoConcurso || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-            
-            status.innerText = `Concurso ${data2.concurso} carregado via Backup!`;
+
+            status.innerText = `Sorteio atualizado com sucesso! (Rota ${i + 1})`;
             status.style.color = "#2ebd59";
-            
-        } catch (err2) {
-            status.innerText = "Sistemas da Caixa instáveis. Digite manualmente.";
-            status.style.color = "#EF4444";
-            console.error("Falha em ambas as APIs:", err2);
+            sucesso = true;
+            break; 
+
+        } catch (error) {
+            console.warn(`Rota ${i + 1} falhou. Tentando a próxima...`);
         }
+    }
+
+    if (!sucesso) {
+        status.innerText = "Rede da Caixa bloqueada no momento. Digite os 6 números à mão.";
+        status.style.color = "#EF4444";
     }
 }
 
@@ -272,8 +260,10 @@ function conferir() {
     let html = "";
     let ganhou = false;
 
-    meusJogos.forEach((jogo, i) => {
+    meusJogos.forEach((jogoObj, i) => {
         let acertos = 0;
+        const jogo = jogoObj.numeros;
+        const dono = jogoObj.dono; 
         
         const jogoHtml = jogo.map(n => {
             const dezenaFormatada = n.toString().padStart(2, '0');
@@ -292,11 +282,14 @@ function conferir() {
         else if (acertos === 6) faixa = " (👑 SENA!!!)";
 
         html += `
-            <div style="margin-bottom: 12px; font-size: 0.95em; border-bottom: 1px dashed #374151; padding-bottom: 8px; color: #E5E7EB;">
-                <b>Jogo ${i + 1}:</b> ${jogoHtml} <br>
-                <span style="font-size: 0.85em; color: ${acertos >= 4 ? '#34D399' : '#9CA3AF'}; font-weight: ${acertos >= 4 ? 'bold' : 'normal'}">
-                    🎯 ${acertos} acertos${faixa}
-                </span>
+            <div style="margin-bottom: 14px; font-size: 0.95em; border-bottom: 1px dashed #374151; padding-bottom: 10px; color: #E5E7EB;">
+                <div style="margin-bottom: 6px;"><b>Jogo ${i + 1}:</b> ${jogoHtml}</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; background: #1F2937; padding: 6px 10px; border-radius: 6px;">
+                    <span style="font-size: 0.85em; color: #60A5FA; font-weight: bold;">👤 ${dono}</span>
+                    <span style="font-size: 0.85em; color: ${acertos >= 4 ? '#34D399' : '#9CA3AF'}; font-weight: ${acertos >= 4 ? 'bold' : 'normal'}">
+                        🎯 ${acertos} acertos${faixa}
+                    </span>
+                </div>
             </div>
         `;
     });
@@ -325,7 +318,9 @@ function copiarWhatsApp() {
 
     let texto = `🍀 *RESUMO MEGA-SENA*\n🔢 *Concurso:* ${conc}\n💰 *Prêmio Concurso:* R$ ${prem}\n🚀 *Acumulou:* ${acumu}\n🔮 *Próximo Prêmio:* R$ ${proxPrem}\n✨ *Resultado:* ${sorteadosStr}\n--------------------------\n`;
     
-    meusJogos.forEach((jogo) => {
+    meusJogos.forEach((jogoObj) => {
+        const jogo = jogoObj.numeros;
+        const dono = jogoObj.dono;
         const acertos = jogo.filter(n => sorteados.includes(n)).length;
         
         const jogoFormatadoWpp = jogo.map(n => {
@@ -336,13 +331,14 @@ function copiarWhatsApp() {
             return dezenaFormatada;
         }).join('  ');
 
-        texto += jogoFormatadoWpp;
+        texto += `👤 *${dono}*\n`;
+        texto += `🎲 ${jogoFormatadoWpp}`;
 
         if (acertos > 0) {
             const labelAcerto = acertos === 1 ? 'acerto' : 'acertos';
             texto += `  -> *${acertos} ${labelAcerto}*`;
         }
-        texto += `\n`;
+        texto += `\n\n`;
     });
 
     texto += `--------------------------\n`;
@@ -387,7 +383,7 @@ async function gerarFotoResultado() {
                     alert("Imagem gerada, salva e copiada! Só dar 'Colar' no WhatsApp. 😉");
                 });
             } catch (e) {
-                alert("Imagem baixada com sucesso!");
+                // Silencioso se der erro no clipboard do navegador
             }
         }, 'image/png');
         
