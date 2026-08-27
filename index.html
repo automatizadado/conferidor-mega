@@ -159,7 +159,8 @@ const meusJogos = [
     [5, 10, 23, 37, 40, 53],
     [1, 6, 14, 17, 24, 57],
     [3, 8, 9, 23, 30, 34],
-    [4, 6, 16, 32, 38, 50]
+    [4, 6, 16, 32, 38, 50],
+    [05, 10, 17, 22, 33, 38]
 ];
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -183,19 +184,17 @@ function getSorteados() {
 
 async function buscarUltimoResultado() {
     const status = document.getElementById('status');
-    status.innerText = "Buscando concurso mais recente...";
+    status.innerText = "Buscando concurso... (pode levar alguns segundos)";
     status.style.color = "#9CA3AF";
     
     try {
-        // URL Oficial da Caixa + Proxy CORS para não ser bloqueado pelo navegador
-        const urlOficial = 'https://servicebus2.caixa.gov.br/portaldeloterias/api/megasena/';
-        const response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(urlOficial)}`);
+        // TENTATIVA 1: API Guidi (Espelho ultra rápido da Caixa)
+        const response = await fetch('https://api.guidi.dev.br/loteria/megasena/ultimo');
+        if (!response.ok) throw new Error("API Principal Falhou");
         
-        if (!response.ok) throw new Error("Erro na rede ao buscar a API");
         const data = await response.json();
         
-        const currentConcurso = data.numero;
-        document.getElementById('concurso').value = currentConcurso;
+        document.getElementById('concurso').value = data.numero;
         
         // Renderiza as dezenas sorteadas
         const dezenas = data.listaDezenas;
@@ -214,41 +213,51 @@ async function buscarUltimoResultado() {
             inputAcumulou.style.color = "#60A5FA";
         }
 
-        // Busca no concurso anterior (N-1) o valor que foi estimado para este concurso
-        let valorPremioConcursoAtual = null;
-        try {
-            const prevUrl = `https://servicebus2.caixa.gov.br/portaldeloterias/api/megasena/${currentConcurso - 1}`;
-            const prevResponse = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(prevUrl)}`);
-            if (prevResponse.ok) {
-                const prevData = await prevResponse.json();
-                valorPremioConcursoAtual = prevData.valorEstimadoProximoConcurso;
-            }
-        } catch (prevError) {
-            console.warn("Não foi possível acessar o concurso anterior para validar o prêmio real.");
-        }
-        
-        // Define o valor Sorteado Final
-        let valorSorteadoFinal = valorPremioConcursoAtual || data.valorAcumuladoProximoConcurso || 0;
-        
-        // Se alguém ganhou a Sena (não acumulou), pegamos o prêmio exato pago na primeira faixa
+        // Define os prêmios
+        let valorSorteadoFinal = data.valorAcumuladoProximoConcurso || 0;
         if (!acumulou && data.listaRateioPremio && data.listaRateioPremio.length > 0) {
              valorSorteadoFinal = data.listaRateioPremio[0].valorPremio; 
         }
-        
-        // Estimativa Final para o Próximo Concurso
         const valorProximoEstimado = data.valorEstimadoProximoConcurso || 0;
         
-        // Preenche os campos de valores formatando para Moeda
         document.getElementById('premio').value = valorSorteadoFinal.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
         document.getElementById('proximo-premio').value = valorProximoEstimado.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
         
-        status.innerText = `Concurso ${currentConcurso} carregado com sucesso!`;
+        status.innerText = `Concurso ${data.numero} carregado com sucesso!`;
         status.style.color = "#2ebd59";
         
     } catch (error) {
-        status.innerText = "Erro ao buscar dados da Caixa. Digite os números manualmente.";
-        status.style.color = "#EF4444";
-        console.error("Erro Técnico:", error);
+        // TENTATIVA 2 (FALLBACK): Servidor OnRender espelho do Heroku
+        try {
+            status.innerText = "Tentando servidor alternativo...";
+            const res = await fetch('https://loteriascaixa-api.onrender.com/api/megasena/latest');
+            if (!res.ok) throw new Error("API Secundária Falhou");
+            
+            const data2 = await res.json();
+            
+            document.getElementById('concurso').value = data2.concurso;
+            for (let i = 1; i <= 6; i++) {
+                document.getElementById('s' + i).value = parseInt(data2.dezenas[i-1]);
+            }
+            
+            const inputAcumulou2 = document.getElementById('acumulou');
+            if (data2.acumulou) {
+                inputAcumulou2.value = "SIM! 🚀"; inputAcumulou2.style.color = "#2ebd59";
+            } else {
+                inputAcumulou2.value = "NÃO 🎯"; inputAcumulou2.style.color = "#60A5FA";
+            }
+            
+            document.getElementById('premio').value = (data2.valorAcumuladoProximoConcurso || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+            document.getElementById('proximo-premio').value = (data2.valorEstimadoProximoConcurso || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+            
+            status.innerText = `Concurso ${data2.concurso} carregado via Backup!`;
+            status.style.color = "#2ebd59";
+            
+        } catch (err2) {
+            status.innerText = "Sistemas da Caixa instáveis. Digite manualmente.";
+            status.style.color = "#EF4444";
+            console.error("Falha em ambas as APIs:", err2);
+        }
     }
 }
 
@@ -267,7 +276,7 @@ function conferir() {
         let acertos = 0;
         
         const jogoHtml = jogo.map(n => {
-            const dezenaFormatada = n.toString().padStart(2, '0'); // Garante visualmente os zeros à esquerda
+            const dezenaFormatada = n.toString().padStart(2, '0');
             if (sorteados.includes(n)) {
                 acertos++;
                 return `<span style="background: #2ebd59; color: #000000; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin: 0 2px; box-shadow: 0 0 5px rgba(46,189,89,0.5);">${dezenaFormatada}</span>`;
@@ -391,5 +400,4 @@ async function gerarFotoResultado() {
 }
 </script>
 </body>
-    </html>
-    
+</html>
