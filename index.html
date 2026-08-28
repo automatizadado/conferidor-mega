@@ -6,7 +6,7 @@
     <title>Conferidor Premium Mega-Sena</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        /* --- ESTILO GLOBAL DARK MODE --- */
+        /* --- ESTILO GLOBAL DARK MODE PREMIUM --- */
         body { 
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
             background: #000000; 
@@ -43,8 +43,8 @@
             gap: 8px;
         }
 
-        .input-group { margin-bottom: 12px; }
-        label { display: block; font-size: 0.85em; color: #9CA3AF; font-weight: bold; margin-bottom: 4px; }
+        .input-group-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        label { display: block; font-size: 0.85em; color: #9CA3AF; font-weight: 600; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
 
         input { 
             padding: 12px; 
@@ -56,6 +56,7 @@
             background: #1F2937; 
             color: #FFFFFF; 
             transition: all 0.2s; 
+            font-weight: 500;
         }
         input:focus { 
             border-color: #2ebd59; 
@@ -67,8 +68,9 @@
         .sorteados-container { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-top: 5px; }
         .sorteados-container input { 
             text-align: center; 
-            padding: 10px 2px; 
-            font-weight: bold; 
+            padding: 12px 2px; 
+            font-weight: 800; 
+            font-size: 1.1em;
             background: #111827; 
             border: 1px solid #2ebd59; 
             border-radius: 8px; 
@@ -100,26 +102,64 @@
         .btn-whatsapp { background: linear-gradient(135deg, #25d366, #128c7e); color: white; display: none; margin-top: 15px; box-shadow: 0 4px 14px rgba(37, 211, 102, 0.25); }
         .btn-foto { background: linear-gradient(135deg, #00b4db, #0083b0); color: white; display: none; margin-top: 10px; box-shadow: 0 4px 14px rgba(0, 180, 219, 0.25); }
 
-        .resultado { margin-top: 20px; padding: 18px; background: #111827; border-radius: 12px; display: none; border: 1px solid #374151; }
-        .alerta-vitoria { background: #064E3B; color: #A7F3D0; padding: 12px; border-radius: 8px; border: 1px solid #047857; margin-top: 15px; font-weight: bold; text-align: center; display: none; }
+        .resultado { margin-top: 20px; padding: 5px 0 0 0; display: none; }
+        
+        /* Banner de Vitória Dinâmico */
+        .alerta-vitoria { 
+            color: #FFF; 
+            padding: 12px; 
+            border-radius: 8px; 
+            margin-top: 15px; 
+            font-weight: 800; 
+            text-align: center; 
+            display: none; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            letter-spacing: 0.5px;
+            font-size: 1.1em;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        }
+        
         #status { font-size: 0.85em; text-align: center; color: #9CA3AF; margin-bottom: 12px; font-weight: 500; }
 
-        .backup-section {
-            border-top: 1px dashed #374151;
-            margin-top: 10px;
-            padding-top: 15px;
-            margin-bottom: 15px;
+        .backup-section { border-top: 1px dashed #374151; margin-top: 10px; padding-top: 15px; margin-bottom: 15px; }
+
+        /* ========================================================= */
+        /* MÁGICA: DEIXANDO A FOTO COMPACTA E CORRIGINDO CORTES      */
+        /* ========================================================= */
+        .card.capturando { padding: 18px; border: none; background: #0F1115; }
+        .card.capturando h2 { margin-bottom: 12px; font-size: 1.25em; }
+        .card.capturando .input-group-row { margin-bottom: 8px; gap: 8px; }
+        .card.capturando label { font-size: 0.7em; margin-bottom: 3px; color: #9CA3AF; }
+        
+        /* Ajuste do Line-Height e Padding para não cortar letras nas caixas */
+        .card.capturando input:not(#s1):not(#s2):not(#s3):not(#s4):not(#s5):not(#s6) {
+            padding: 12px 10px !important; 
+            font-size: 14px !important; 
+            border-color: #374151 !important;
+            color: #F9FAFB !important;
+            height: auto !important;
+            line-height: 1.4 !important;
+        }
+        
+        .card.capturando .sorteados-container { margin-bottom: 12px; gap: 6px; }
+        .card.capturando .sorteados-container input {
+            padding: 12px 0 !important; 
+            height: auto !important;
+            line-height: 1.2 !important;
+            font-size: 1.1em !important;
+            background: #1F2937 !important;
+            border: 1px solid #374151 !important;
+            color: #34D399 !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
 
-        .card.capturando .btn-api,
-        .card.capturando .btn-backup,
-        .card.capturando .backup-section,
-        .card.capturando .btn-check,
-        .card.capturando .btn-whatsapp,
-        .card.capturando .btn-foto,
-        .card.capturando #status {
-            display: none !important;
-        }
+        .card.capturando #proximo-premio { color: #F59E0B !important; }
+        .card.capturando #acumulou { color: #34D399 !important; }
+        
+        /* Esconde botões na foto */
+        .card.capturando .btn-api, .card.capturando .btn-backup, .card.capturando .backup-section,
+        .card.capturando .btn-check, .card.capturando .btn-whatsapp, .card.capturando .btn-foto,
+        .card.capturando #status { display: none !important; }
     </style>
 </head>
 <body>
@@ -127,25 +167,25 @@
 <div class="card">
     <h2>🍀 💰 Conferidor Mega-Sena 💰 🍀</h2>
     
-    <div id="status">Clique abaixo para buscar o último sorteio</div>
+    <div id="status">Digite o concurso desejado (ou deixe em branco para o último)</div>
     
+    <div class="input-group-row">
+        <div style="flex: 1.2;"><label>Concurso</label><input type="number" id="concurso" placeholder="Ex: 3050"></div>
+        <div style="flex: 0.9;"><label>Restantes</label><input type="number" id="restantes" value="12" oninput="salvarRestantes(this.value)"></div>
+        <div style="flex: 1.1;"><label>Acumulou?</label><input type="text" id="acumulou" readonly style="font-weight: bold; text-align: center;"></div>
+    </div>
+
     <button class="btn-api" onclick="buscarUltimoResultado()">🔄 1. Buscar Automático</button>
 
     <div class="backup-section">
         <div style="font-size: 0.8em; color: #9CA3AF; text-align: center; margin-bottom: 8px;">
-            Se o automático falhar: <a href="https://servicebus2.caixa.gov.br/portaldeloterias/api/megasena/" target="_blank" style="color: #60A5FA; font-weight: bold; text-decoration: none;">Clique Aqui (Página de Dados)</a>, salve a página aberta (Ctrl+S) e importe abaixo:
+            Se o automático falhar: <a href="javascript:void(0)" onclick="abrirLinkCaixa()" style="color: #60A5FA; font-weight: bold; text-decoration: none;">Clique Aqui (Página de Dados)</a>, salve a página (Ctrl+S) e importe abaixo:
         </div>
         <input type="file" id="arquivo-caixa" accept=".json, .txt, .html" style="display: none;" onchange="importarArquivo(event)">
         <button class="btn-backup" onclick="document.getElementById('arquivo-caixa').click()">📁 2. Importar Arquivo Baixado</button>
     </div>
 
-    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-        <div style="flex: 1.2;"><label>Concurso</label><input type="number" id="concurso"></div>
-        <div style="flex: 0.9;"><label>Restantes</label><input type="number" id="restantes" value="12" oninput="salvarRestantes(this.value)"></div>
-        <div style="flex: 1.1;"><label>Acumulou?</label><input type="text" id="acumulou" readonly style="font-weight: bold; text-align: center;"></div>
-    </div>
-
-    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+    <div class="input-group-row">
         <div style="flex: 1;"><label>Prêmio Sorteado (R$)</label><input type="text" id="premio"></div>
         <div style="flex: 1;"><label>Próximo Prêmio (R$)</label><input type="text" id="proximo-premio" style="color: #F59E0B; font-weight: bold;"></div>
     </div>
@@ -158,7 +198,7 @@
 
     <button class="btn-check" style="margin-top: 20px;" onclick="conferir()">Conferir Meus Jogos 🎯</button>
     
-    <div id="alerta" class="alerta-vitoria">🎊 TEVE JOGO PREMIADO! 🤑 🎊</div>
+    <div id="alerta" class="alerta-vitoria"></div>
 
     <div id="resultado-box" class="resultado">
         <div id="lista-acertos"></div>
@@ -198,25 +238,47 @@ function getSorteados() {
     ].filter(n => !isNaN(n));
 }
 
+function abrirLinkCaixa() {
+    const num = document.getElementById('concurso').value.trim();
+    const url = num 
+        ? `https://servicebus2.caixa.gov.br/portaldeloterias/api/megasena/${num}`
+        : `https://servicebus2.caixa.gov.br/portaldeloterias/api/megasena/`;
+    window.open(url, '_blank');
+}
+
+async function fetchComTimeout(url, options = {}, tempoLimite = 4000) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), tempoLimite);
+    const response = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(id);
+    return response;
+}
+
 // -------------------------------------------------------------
 // FUNÇÃO 1: BUSCA AUTOMÁTICA
 // -------------------------------------------------------------
 async function buscarUltimoResultado() {
+    const numConcurso = document.getElementById('concurso').value.trim();
     const status = document.getElementById('status');
-    status.innerText = "Conectando aos servidores...";
+    
+    if (numConcurso) {
+        status.innerText = `Buscando concurso ${numConcurso}...`;
+    } else {
+        status.innerText = "Buscando último concurso disponível...";
+    }
     status.style.color = "#F59E0B";
 
     const endpoints = [
-        { url: 'https://api.guidi.dev.br/loteria/megasena/ultimo', tipo: 'guidi' },
-        { url: 'https://loteriascaixa-api.onrender.com/api/megasena/latest', tipo: 'render' },
-        { url: `https://api.allorigins.win/get?url=${encodeURIComponent('https://servicebus2.caixa.gov.br/portaldeloterias/api/megasena/')}`, tipo: 'allorigins' }
+        { url: `https://loteriascaixa-api.onrender.com/api/megasena/${numConcurso || 'latest'}`, tipo: 'render' },
+        { url: `https://api.guidi.dev.br/loteria/megasena/${numConcurso || 'ultimo'}`, tipo: 'guidi' },
+        { url: `https://api.allorigins.win/get?url=${encodeURIComponent('https://servicebus2.caixa.gov.br/portaldeloterias/api/megasena/' + numConcurso)}`, tipo: 'allorigins' }
     ];
 
     let sucesso = false;
 
     for (let i = 0; i < endpoints.length; i++) {
         try {
-            const response = await fetch(endpoints[i].url);
+            const response = await fetchComTimeout(endpoints[i].url, {}, 6000);
             if (!response.ok) throw new Error("HTTP Erro");
             let data = await response.json();
             
@@ -225,7 +287,7 @@ async function buscarUltimoResultado() {
 
             await preencherCamposComData(data, endpoints[i].tipo);
 
-            status.innerText = `Sorteio atualizado via Automático!`;
+            status.innerText = `Sorteio ${data.concurso || data.numero} atualizado com sucesso!`;
             status.style.color = "#2ebd59";
             sucesso = true;
             break; 
@@ -235,13 +297,13 @@ async function buscarUltimoResultado() {
     }
 
     if (!sucesso) {
-        status.innerText = "Sistemas instáveis. Tente usar a Opção 2 (Importar).";
+        status.innerText = "Sistemas instáveis. Digite os números à mão ou Importe.";
         status.style.color = "#EF4444";
     }
 }
 
 // -------------------------------------------------------------
-// FUNÇÃO 2: IMPORTAÇÃO MANUAL DO ARQUIVO DA CAIXA
+// FUNÇÃO 2: IMPORTAÇÃO MANUAL
 // -------------------------------------------------------------
 function importarArquivo(event) {
     const file = event.target.files[0];
@@ -251,9 +313,8 @@ function importarArquivo(event) {
     reader.onload = async function(e) {
         let texto = e.target.result;
 
-        // VERIFICA SE O USUÁRIO SALVOU O SITE VISUAL EM VEZ DOS DADOS BRUTOS
         if (texto.includes("<html") && !texto.includes('"listaDezenas"')) {
-            alert("⚠️ ATENÇÃO: Formato incorreto!\n\nVocê salvou a página visual do site da Caixa. \nPara importar, você precisa clicar no link azul 'Clique Aqui (Página de Dados)'. Vai abrir uma tela com textos puros/códigos. É essa página de códigos que você deve salvar (Ctrl+S) e importar aqui.");
+            alert("⚠️ ATENÇÃO: Formato incorreto!\n\nVocê salvou a página visual do site da Caixa.");
             event.target.value = '';
             return;
         }
@@ -263,9 +324,7 @@ function importarArquivo(event) {
                 texto = texto.split("<pre>")[1].split("</pre>")[0];
             }
             texto = texto.replace(/(<([^>]+)>)/gi, "");
-            
             const data = JSON.parse(texto.trim());
-            
             if (!data.numero && !data.listaDezenas) throw new Error("Estrutura não reconhecida");
 
             await preencherCamposComData(data, 'caixa');
@@ -273,42 +332,35 @@ function importarArquivo(event) {
             const status = document.getElementById('status');
             status.innerText = `Sorteio ${data.numero} importado do arquivo com sucesso!`;
             status.style.color = "#2ebd59";
-
         } catch (err) {
-            alert("Erro ao ler o arquivo. Certifique-se de que salvou a página de dados corretamente.");
+            alert("Erro ao ler o arquivo.");
             console.error(err);
         }
-        
         event.target.value = '';
     };
     reader.readAsText(file);
 }
 
 // -------------------------------------------------------------
-// FUNÇÃO AUXILIAR: PREENCHE A TELA COM LÓGICA DE PRÊMIO CORRIGIDA
+// PREENCHIMENTO E LÓGICA DE PRÊMIOS
 // -------------------------------------------------------------
 async function preencherCamposComData(data, tipo) {
-    // 1. Número do Concurso
-    const conc = tipo === 'render' ? data.concurso : data.numero;
+    const conc = parseInt(tipo === 'render' ? data.concurso : data.numero, 10);
     document.getElementById('concurso').value = conc;
 
-    // 2. Verifica se Acumulou
     const acumulou = tipo === 'render' ? data.acumulou : data.acumulado;
     const inputAcumulou = document.getElementById('acumulou');
     inputAcumulou.value = acumulou ? "SIM! 🚀" : "NÃO 🎯";
-    inputAcumulou.style.color = acumulou ? "#2ebd59" : "#60A5FA";
+    inputAcumulou.style.color = acumulou ? "#34D399" : "#60A5FA";
 
-    // 3. Dezenas Sorteadas
     const dezenas = tipo === 'render' ? data.dezenas : data.listaDezenas;
     for (let j = 1; j <= 6; j++) { 
         document.getElementById('s' + j).value = parseInt(dezenas[j-1]); 
     }
 
-    // 4. Lógica de Valores (Prêmios)
     let valorSorteadoFinal = 0;
     const valorProximoEstimado = data.valorEstimadoProximoConcurso || 0;
 
-    // Se NÃO acumulou, pegamos o valor ganho pela sena
     if (!acumulou) {
         if (tipo === 'render' && data.premiacoes && data.premiacoes.length > 0) {
             valorSorteadoFinal = data.premiacoes[0].premio || 0;
@@ -319,27 +371,29 @@ async function preencherCamposComData(data, tipo) {
 
     document.getElementById('proximo-premio').value = valorProximoEstimado.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
     
-    // Se acumulou (ou deu 0 na faixa 1), buscamos a real estimativa acessando o concurso anterior
     if (acumulou || valorSorteadoFinal === 0) {
-        document.getElementById('premio').value = "Calculando...";
+        document.getElementById('premio').value = "Buscando estimativa...";
+        let valorPremioConcursoAtual = null;
         try {
-            const resPrev = await fetch(`https://api.guidi.dev.br/loteria/megasena/${conc - 1}`);
-            if (resPrev.ok) {
-                const dataPrev = await resPrev.json();
-                valorSorteadoFinal = dataPrev.valorEstimadoProximoConcurso || 0;
-            } else {
-                valorSorteadoFinal = data.valorAcumuladoProximoConcurso || 0;
+            const prevResponse = await fetchComTimeout(`https://brasilapi.com.br/api/loterias/v1/megasena/${conc - 1}`, {}, 3000);
+            if (prevResponse.ok) {
+                const prevData = await prevResponse.json();
+                valorPremioConcursoAtual = prevData.valor_estimado_proximo_concurso; 
             }
-        } catch(e) {
-            valorSorteadoFinal = data.valorAcumuladoProximoConcurso || 0;
-        }
-    }
+        } catch (prevError) {}
 
-    document.getElementById('premio').value = valorSorteadoFinal.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+        if (valorPremioConcursoAtual) {
+            document.getElementById('premio').value = valorPremioConcursoAtual.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+        } else {
+            document.getElementById('premio').value = "--- (Edite o valor)";
+        }
+    } else {
+        document.getElementById('premio').value = valorSorteadoFinal.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+    }
 }
 
 // -------------------------------------------------------------
-// MÉTODOS DE EXIBIÇÃO E EXPORTAÇÃO
+// MÉTODOS DE EXIBIÇÃO: DESIGN 3D LISO E ALINHADO
 // -------------------------------------------------------------
 function conferir() {
     const sorteados = getSorteados();
@@ -349,39 +403,48 @@ function conferir() {
         return; 
     }
 
+    const listaAcertos = document.getElementById('lista-acertos');
+    listaAcertos.style.display = 'grid';
+    listaAcertos.style.gridTemplateColumns = '1fr 1fr'; 
+    listaAcertos.style.gap = '10px';
+
     let html = "";
     let ganhou = false;
+    let maxAcertos = 0;
 
     meusJogos.forEach((jogoObj, i) => {
         let acertos = 0;
         const jogo = jogoObj.numeros;
         const dono = jogoObj.dono; 
         
+        // VISUAL 3D LISO (SEM QUADRADO INTERNO) E EM LINHA ÚNICA
         const jogoHtml = jogo.map(n => {
             const dezenaFormatada = n.toString().padStart(2, '0');
             if (sorteados.includes(n)) {
                 acertos++;
-                return `<span style="background: #2ebd59; color: #000000; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin: 0 2px; box-shadow: 0 0 5px rgba(46,189,89,0.5);">${dezenaFormatada}</span>`;
+                return `<span style="display: inline-block; background: linear-gradient(145deg, #34D399, #10B981); color: #000; padding: 2px 5px; border-radius: 5px; font-weight: 900; margin: 0 1px; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">${dezenaFormatada}</span>`;
             }
-            return `<span style="margin: 0 2px; color: #9CA3AF;">${dezenaFormatada}</span>`;
-        }).join(' ');
+            return `<span style="display: inline-block; background: #374151; color: #E5E7EB; padding: 2px 5px; border-radius: 5px; font-weight: 700; margin: 0 1px; box-shadow: 0 2px 3px rgba(0,0,0,0.2);">${dezenaFormatada}</span>`;
+        }).join('');
 
+        if (acertos > maxAcertos) maxAcertos = acertos;
         if (acertos >= 4) ganhou = true;
 
         let faixa = "";
-        if (acertos === 4) faixa = " (🏅 QUADRA!)";
-        else if (acertos === 5) faixa = " (🔥 QUINA!!)";
-        else if (acertos === 6) faixa = " (👑 SENA!!!)";
+        if (acertos === 4) faixa = "🏅 QUADRA";
+        else if (acertos === 5) faixa = "🔥 QUINA";
+        else if (acertos === 6) faixa = "👑 SENA";
 
         html += `
-            <div style="margin-bottom: 14px; font-size: 0.95em; border-bottom: 1px dashed #374151; padding-bottom: 10px; color: #E5E7EB;">
-                <div style="margin-bottom: 6px;"><b>Jogo ${i + 1}:</b> ${jogoHtml}</div>
-                <div style="display: flex; justify-content: space-between; align-items: center; background: #1F2937; padding: 6px 10px; border-radius: 6px;">
-                    <span style="font-size: 0.85em; color: #60A5FA; font-weight: bold;">👤 ${dono}</span>
-                    <span style="font-size: 0.85em; color: ${acertos >= 4 ? '#34D399' : '#9CA3AF'}; font-weight: ${acertos >= 4 ? 'bold' : 'normal'}">
-                        🎯 ${acertos} acertos${faixa}
-                    </span>
+            <div style="background: #181C25; padding: 12px 8px; border-radius: 10px; border-top: 4px solid ${acertos >= 4 ? '#10B981' : '#374151'}; box-shadow: 0 4px 6px rgba(0,0,0,0.25); display: flex; flex-direction: column; justify-content: space-between;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #374151; padding-bottom: 8px; margin-bottom: 10px;">
+                    <span style="font-size: 0.9em; color: #60A5FA; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60%; padding-left: 4px;">👤 ${dono}</span>
+                    <span style="font-size: 0.85em; color: ${acertos >= 4 ? '#34D399' : '#9CA3AF'}; font-weight: ${acertos >= 4 ? '800' : '600'}; padding-right: 4px;">🎯 ${acertos} acertos</span>
                 </div>
+                <div style="font-size: 1.05em; text-align: center; color: #E5E7EB; white-space: nowrap;">
+                    ${jogoHtml}
+                </div>
+                ${faixa ? `<div style="margin-top: 10px; text-align: center; font-size: 0.85em; background: linear-gradient(135deg, #10B981, #047857); color: #fff; font-weight: 800; border-radius: 4px; padding: 4px; text-transform: uppercase; box-shadow: 0 2px 4px rgba(16,185,129,0.3);">${faixa}</div>` : ''}
             </div>
         `;
     });
@@ -390,7 +453,27 @@ function conferir() {
     document.getElementById('resultado-box').style.display = 'block';
     document.getElementById('btn-wa').style.display = 'block';
     document.getElementById('btn-foto').style.display = 'block';
-    document.getElementById('alerta').style.display = ganhou ? 'block' : 'none';
+    
+    // MENSAGEM DO BANNER PRINCIPAL DINÂMICA
+    const alertaDiv = document.getElementById('alerta');
+    if (ganhou) {
+        if (maxAcertos === 6) {
+            alertaDiv.innerHTML = "👑 ACERTAMOS AS SEIS DEZENAS! 🤑 👑";
+            alertaDiv.style.background = "linear-gradient(135deg, #D97706, #92400E)";
+            alertaDiv.style.borderColor = "#F59E0B";
+        } else if (maxAcertos === 5) {
+            alertaDiv.innerHTML = "🔥 ACERTAMOS A QUINA! 🤑 🔥";
+            alertaDiv.style.background = "linear-gradient(135deg, #064E3B, #047857)";
+            alertaDiv.style.borderColor = "#10B981";
+        } else {
+            alertaDiv.innerHTML = "🏅 ACERTAMOS A QUADRA! 🤑 🏅";
+            alertaDiv.style.background = "linear-gradient(135deg, #064E3B, #047857)";
+            alertaDiv.style.borderColor = "#10B981";
+        }
+        alertaDiv.style.display = 'block';
+    } else {
+        alertaDiv.style.display = 'none';
+    }
 }
 
 function copiarWhatsApp() {
@@ -437,9 +520,9 @@ function copiarWhatsApp() {
     texto += `⏳ *Sorteios restantes:* ${rest}`;
 
     navigator.clipboard.writeText(texto).then(() => {
-        alert("Resumo de conferência copiado para o WhatsApp!");
+        alert("Resumo copiado para o WhatsApp!");
     }).catch(err => {
-        alert("Erro ao copiar automaticamente.");
+        alert("Erro ao copiar.");
     });
 }
 
@@ -452,38 +535,26 @@ async function gerarFotoResultado() {
     
     await new Promise(resolve => setTimeout(resolve, 150));
     
-    html2canvas(card, {
-        scale: 2,
-        backgroundColor: '#121214',
-        useCORS: true
-    }).then(canvas => {
+    html2canvas(card, { scale: 2, backgroundColor: '#0F1115', useCORS: true }).then(canvas => {
         card.classList.remove('capturando');
         btnFoto.innerText = "Salvar Imagem do Resultado 📸";
         
         const nConcurso = document.getElementById('concurso').value || "Mega";
-        const nomeArquivo = `Resultado_Mega_Concurso_${nConcurso}.png`;
-        
         const link = document.createElement('a');
-        link.download = nomeArquivo;
+        link.download = `Resultado_Mega_${nConcurso}.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
         
         canvas.toBlob(blob => {
             try {
-                const item = new ClipboardItem({ "image/png": blob });
-                navigator.clipboard.write([item]).then(() => {
-                    alert("Imagem gerada, salva e copiada! Só dar 'Colar' no WhatsApp. 😉");
+                navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]).then(() => {
+                    alert("Imagem gerada, baixada e copiada! Só colar no WhatsApp. 😉");
                 });
-            } catch (e) {
-                // Silencioso se der erro no clipboard do navegador
-            }
+            } catch (e) {}
         }, 'image/png');
-        
     }).catch(err => {
         card.classList.remove('capturando');
         btnFoto.innerText = "Salvar Imagem do Resultado 📸";
-        alert("Erro ao gerar imagem.");
-        console.error(err);
     });
 }
 </script>
